@@ -7,6 +7,11 @@ app.use(cors());
 app.use(express.json()); 
 app.use(express.static(__dirname)); // Cho phép chạy file tĩnh khi up lên Render
 
+const path = require('path');
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) console.error("Lỗi mở database:", err.message);
     else console.log("Đã kết nối SQLite Database.");
