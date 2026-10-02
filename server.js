@@ -5,7 +5,7 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 app.use(cors()); 
 app.use(express.json()); 
-app.use(express.static('jungle'));
+app.use(express.static(__dirname)); // Cho phép chạy file tĩnh khi up lên Render
 
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) console.error("Lỗi mở database:", err.message);
@@ -475,9 +475,7 @@ app.post('/finish_dolphin', (req, res) => {
     });
 });
 
-// Chạy server cổng 8080
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`[BẢO MẬT 100% ATOMIC] Máy chủ Game đang chạy tại: http://localhost:${PORT}`);
-    console.log(`=> Hãy mở Terminal khác và chạy: ngrok http 8080`);
 });
