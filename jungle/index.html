@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kho Báu Rừng Xanh - Slot</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100dvh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      color: #fff;
+      user-select: none;
+      overflow: hidden;
+      position: relative;
+      background-color: #1a2a1a; 
+      background-image: url('bg-game.png'), url('hinhnen.jpg');
+      background-repeat: no-repeat;
+      background-position: top center;
+      background-size: cover;
+    }
+
+    /* BẢNG ĐĂNG NHẬP */
+    #login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center; z-index: 99999999; }
+    .login-box { background: linear-gradient(135deg, #05200a 0%, #1a4d1f 100%); border: 3px solid #ffcc00; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 0 40px #ff9800; width: 90%; max-width: 400px; }
+    .login-title { color: #ffe600; font-size: 1.8rem; margin-bottom: 10px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
+    .login-desc { color: #00ffcc; margin-bottom: 20px; font-size: 0.95rem; }
+    #username-input, #password-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #5a753c; border-radius: 8px; background: #1a2a1a; color: #fff; font-size: 1.2rem; text-align: center; outline: none; font-weight: bold; }
+    #password-input { margin-bottom: 20px; }
+    #username-input:focus, #password-input:focus { border-color: #00ffcc; box-shadow: 0 0 10px #00ffcc; }
+    .login-btn { background: linear-gradient(180deg, #ffd700 0%, #ff8800 100%); border: none; padding: 12px 30px; border-radius: 8px; font-size: 1.2rem; font-weight: bold; color: #000; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.6); width: 100%; }
+    .login-btn:active { transform: scale(0.95); }
+
+    /* TOP HUD */
+    .top-hud { position: absolute; top: 5px; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 15px; z-index: 20; pointer-events: none; gap: 8px; }
+    .top-box { background: linear-gradient(to bottom, #504638, #2a2218); border: 2px solid #5a753c; border-radius: 8px; padding: 6px 10px; text-align: center; min-width: 70px; box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.1); pointer-events: auto; }
+    #free-spin-box { visibility: hidden; position: relative; }
+    #free-spin-box.active { visibility: visible; }
+    .top-label { font-size: 0.55rem; color: #aaddaa; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+    .top-val { font-size: 1rem; font-weight: 900; color: #ffcc00; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
+    .player-name-val { font-size: 0.85rem; color: #00ffff; margin-top: 2px; text-transform: uppercase; white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis; font-weight: bold;}
+
+    /* LỚP BÓNG TỐI LÓT LƯNG & VÙNG CHỨA SƯ TỬ NỀN */
+    .lion-dark-backdrop { position: absolute; top: 5vh; left: 0; width: 100%; height: 25vh; background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0) 70%); z-index: 4; pointer-events: none; }
+    .character-container { width: 100%; flex: 0 0 22vh; display: flex; justify-content: center; align-items: flex-start; position: relative; z-index: 5; margin-top: 1vh; margin-bottom: -10vh; overflow: visible; mix-blend-mode: screen; -webkit-mix-blend-mode: screen; }
+    .character-video { width: 100%; height: 100%; object-fit: cover; object-position: top center; pointer-events: none; background-color: transparent; filter: contrast(1.15) brightness(1.15) saturate(1.2); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
+
+    /* KHUNG SLOT */
+    .slot-container { width: 100%; display: flex; justify-content: center; padding: 0 1vw; z-index: 9990; position: relative; -webkit-tap-highlight-color: transparent; }
+    .slot-frame { position: relative; background-color: transparent; background-image: url('khung_2.png'); background-repeat: no-repeat; background-position: center center; background-size: 100% 100%; border: none; padding: 12.5% 14% 11.5% 14%; filter: drop-shadow(0px 8px 10px rgba(0,0,0,0.6)); width: 100%; max-width: 550px; }
+    .shake-active { animation: screenShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+    @keyframes screenShake { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 20%, 80% { transform: translate(-4px, 4px) rotate(-1deg); } 40% { transform: translate(4px, -4px) rotate(1deg); } 60% { transform: translate(-4px, -4px) rotate(-1deg); } }
+    
+    /* LƯỚI GRID */
+    .slot-grid { display: grid; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; clip-path: inset(0); -webkit-clip-path: inset(0); transform: translateZ(0); grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); background: linear-gradient( to right, transparent 16.66%, rgba(255, 200, 100, 0.4) 16.66%, rgba(255, 200, 100, 0.4) calc(16.66% + 1.5px), transparent calc(16.66% + 1.5px), transparent 33.33%, rgba(255, 200, 100, 0.4) 33.33%, rgba(255, 200, 100, 0.4) calc(33.33% + 1.5px), transparent calc(33.33% + 1.5px), transparent 50.00%, rgba(255, 200, 100, 0.4) 50.00%, rgba(255, 200, 100, 0.4) calc(50.00% + 1.5px), transparent calc(50.00% + 1.5px), transparent 66.66%, rgba(255, 200, 100, 0.4) 66.66%, rgba(255, 200, 100, 0.4) calc(66.66% + 1.5px), transparent calc(66.66% + 1.5px), transparent 83.33%, rgba(255, 200, 100, 0.4) 83.33%, rgba(255, 200, 100, 0.4) calc(83.33% + 1.5px), transparent calc(83.33% + 1.5px) ); }
+    .slot-cell { position: relative; background: transparent !important; display: flex; align-items: center; justify-content: center; font-size: clamp(1.8rem, 8vw, 3.2rem); z-index: 10; will-change: transform, opacity; }
+
+    /* Ô KHÓA & MULTIPLIER */
+    .locked-cell { background-size: 100% 100% !important; background-position: center !important; border: 1px solid #2e8b57 !important; border-radius: 6px !important; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); overflow: hidden !important; z-index: 15 !important; }
+    
+    .multiplier-cell { background-image: url('symbol-nhan.png') !important; background-size: 100% 100% !important; background-position: center !important; border-radius: 6px !important; border: 2px solid #FFF59D !important; overflow: hidden; box-shadow: 0 0 15px rgba(255, 235, 59, 1), inset 0 0 10px rgba(255, 152, 0, 0.6); animation: multiplierGlowPulse 1.2s infinite alternate ease-in-out; }
+    .multiplier-text { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 2; font-family: 'Arial Black', sans-serif; font-size: clamp(1.4rem, 6vw, 2rem); font-weight: 900; color: #ffffff; -webkit-text-stroke: 1.5px #1b5e20; filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.9)); }
+    @keyframes multiplierGlowPulse { 0% { box-shadow: 0 0 8px #ffeb3b, 0 0 15px #ff9800; transform: scale(0.95); } 100% { box-shadow: 0 0 15px #ffff00, 0 0 25px #ff5722; transform: scale(1.05); } }
+
+    .frog-cell, .fish-cell, .boar-cell, .panda-cell, .eagle-cell, .elephant-cell, .unicorn-cell, .tiger-cell, .dragon-cell {
+      background-size: 92% !important; background-position: center !important; background-repeat: no-repeat !important; background-color: transparent !important;
+    }
+    .frog-cell { background-image: url('ech.png') !important; }
+    .fish-cell { background-image: url('symbolca.png') !important; }
+    .boar-cell { background-image: url('heorung.png') !important; }
+    .panda-cell { background-image: url('symbolgautruc.png') !important; }
+    .eagle-cell { background-image: url('symboldaibang.png') !important; }
+    .elephant-cell { background-image: url('symbolvoi.png') !important; }
+    .unicorn-cell { background-image: url('symbolkilan.png') !important; }
+    .tiger-cell { background-image: url('symbolho.png') !important; }
+    .dragon-cell { background-image: url('symbolrong.png') !important; }
+
+    /* SCATTER VIDEO */
+    .scatter-cell { background-color: transparent !important; border-radius: 6px !important; overflow: visible !important; z-index: 50 !important; }
+    .scatter-video-element { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; object-fit: cover; border-radius: 6px; mix-blend-mode: screen; pointer-events: none; }
+    .scatter-glow-border { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 6px; box-shadow: inset 0 0 15px 3px rgba(255, 165, 0, 0.8), 0 0 10px 1px rgba(255, 200, 0, 0.5); z-index: 5; pointer-events: none; }
+
+    /* --- HIỆU ỨNG VÒNG SÁNG QUAY TRÒN & PHÌNH TO --- */
+    .exploding-prep { animation: symbolSwell 1.1s cubic-bezier(0.25, 1, 0.5, 1) forwards !important; z-index: 35 !important; }
+    .exploding-prep::before { 
+      content: ''; 
+      position: absolute; 
+      top: -12%; left: -12%; right: -12%; bottom: -12%; 
+      border-radius: 50%; 
+      background: conic-gradient(from 0deg, transparent 0%, transparent 60%, rgba(255, 235, 59, 0.8) 85%, #ffffff 100%); 
+      animation: spinCircleLight 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
+      z-index: -1; 
+      -webkit-mask: radial-gradient(circle, transparent 60%, black 64%); 
+      mask: radial-gradient(circle, transparent 60%, black 64%);
+      pointer-events: none; 
+      filter: drop-shadow(0 0 8px #ffeb3b);
+    }
+    @keyframes symbolSwell { 
+      0% { transform: scale(1); filter: brightness(1); } 
+      60% { transform: scale(1.18); filter: brightness(1.3) drop-shadow(0 0 12px #ffeb3b); }
+      100% { transform: scale(1.25); filter: brightness(1.6) drop-shadow(0 0 20px #ff9800); } 
+    }
+    @keyframes spinCircleLight { 
+      0% { transform: rotate(0deg); opacity: 0; } 
+      25% { opacity: 1; }
+      100% { transform: rotate(360deg); opacity: 1; } 
+    }
+
+    /* --- HIỆU ỨNG ĐỨT LÌA VÀ TIA CHÉM --- */
+    .global-slash { position: absolute; top: 50%; left: 50%; width: 170%; height: 16px; background: #fff; box-shadow: 0 0 25px 8px #ffeb3b, 0 0 50px 15px #ff5722; transform-origin: center; border-radius: 20px; animation: globalSlashAnim 0.45s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; z-index: 100; pointer-events: none; }
+    @keyframes globalSlashAnim { 0% { transform: translate(-50%, -50%) rotate(-45deg) scaleX(0) scaleY(0.2); opacity: 1; } 30%, 70% { transform: translate(-50%, -50%) rotate(-45deg) scaleX(1.8) scaleY(1.4); opacity: 1; filter: brightness(2.5); } 100% { transform: translate(-50%, -50%) rotate(-45deg) scaleX(2.2) scaleY(0); opacity: 0; filter: blur(6px); } }
+    
+    .exploding-active { z-index: 30 !important; }
+    .split-half { position: absolute !important; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 25; }
+    .top-half { clip-path: polygon(0 0, 100% 0, 0 100%); animation: slideTopLeftCut 1.4s cubic-bezier(0.15, 0.85, 0.35, 1) forwards; }
+    .bottom-half { clip-path: polygon(100% 100%, 0 100%, 100% 0); animation: slideBottomRightCut 1.4s cubic-bezier(0.15, 0.85, 0.35, 1) forwards; }
+    @keyframes slideTopLeftCut { 
+      0% { transform: translate(0, 0) rotate(0deg); opacity: 1; filter: brightness(2); } 
+      20% { transform: translate(-15%, -15%) rotate(-8deg); opacity: 1; filter: brightness(1.6); }
+      100% { transform: translate(-45%, -45%) rotate(-24deg); opacity: 0; filter: blur(8px); } 
+    }
+    @keyframes slideBottomRightCut { 
+      0% { transform: translate(0, 0) rotate(0deg); opacity: 1; filter: brightness(2); } 
+      20% { transform: translate(15%, 15%) rotate(8deg); opacity: 1; filter: brightness(1.6); }
+      100% { transform: translate(45%, 45%) rotate(24deg); opacity: 0; filter: blur(8px); } 
+    }
+    
+    .cell-slash-line { position: absolute; top: 50%; left: -30%; width: 160%; height: 8px; background: #fff; box-shadow: 0 0 12px #ffeb3b, 0 0 25px #ff9800; transform: translateY(-50%) rotate(-45deg); animation: cellSlashLineAnim 0.35s forwards; z-index: 35; pointer-events: none; }
+    @keyframes cellSlashLineAnim { 0% { transform: translateY(-50%) rotate(-45deg) scaleX(0); opacity: 1; } 100% { transform: translateY(-50%) rotate(-45deg) scaleX(1.4); opacity: 0; } }
+
+    /* ANIMATION RƠI VÀ TRƯỢT CHUNG */
+    @keyframes rollOutDownContinuous { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(1000%); opacity: 1; } }
+    @keyframes rollInContinuous { 0% { transform: translateY(-1000%); opacity: 1; } 85% { transform: translateY(3%); opacity: 1; } 100% { transform: translateY(0); opacity: 1; } }
+    .roll-in-continuous { animation: rollInContinuous 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+    @keyframes slideDownFill { 0% { transform: translateY(var(--shift-distance)); } 70% { transform: translateY(5%); } 100% { transform: translateY(0); } }
+    .sliding-down-cell { animation: slideDownFill 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+    @keyframes dropFreeSymbolDirect { 0% { transform: translateY(-300%); opacity: 0; } 70% { transform: translateY(5%); opacity: 1; } 100% { transform: translateY(0); opacity: 1; } }
+    .free-symbol-falling { animation: dropFreeSymbolDirect 1.0s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+    @keyframes rollInTop { 0% { transform: translateY(-150vh); opacity: 0; } 70% { transform: translateY(5%); opacity: 1; } 100% { transform: translateY(0); opacity: 1; } }
+    .roll-in { animation: rollInTop 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+
+    /* VỠ Ổ KHÓA */
+    @keyframes lockExplode { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 40% { transform: scale(1.1) rotate(5deg); filter: brightness(2) drop-shadow(0 0 25px #ff0000); opacity: 1; } 100% { transform: scale(2.5) rotate(35deg); filter: brightness(5); opacity: 0; clip-path: polygon(0% 0%, 100% 0%, 50% 50%, 0% 100%); } }
+    .shattering { animation: lockExplode 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards !important; z-index: 50 !important; }
+    .shatter-debris { position: absolute; width: 8px; height: 8px; background: #4caf50; border: 1px solid #ffe600; border-radius: 2px; pointer-events: none; z-index: 100; animation: debrisFly 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+    @keyframes debrisFly { 0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2) rotate(360deg); } }
+
+    /* --- HIỆU ỨNG TỔNG THẮNG BAY --- */
+    .big-win-overlay { position: absolute; bottom: 26%; top: auto; left: 50%; transform: translateX(-50%); z-index: 100000; display: none; flex-direction: row; align-items: center; justify-content: center; gap: 10px; pointer-events: none; white-space: nowrap; }
+    .big-win-title { font-size: 1.6rem; font-weight: 900; font-family: 'Arial Black', sans-serif; color: #ffe600; text-shadow: 0 0 20px #ff9800, 0 0 40px #ff5722, 2px 2px 5px #000; -webkit-text-stroke: 1px #5d3a00; transition: opacity 0.3s ease; }
+    .big-win-amount { font-size: 2rem; font-weight: 900; font-family: 'Arial Black', sans-serif; color: #fffbcc; text-shadow: 0 0 25px #ffea00, 0 0 50px #ff9800, 3px 3px 5px #000; -webkit-text-stroke: 1px #6d4c00; }
+    .display-balance .display-val { transition: transform 0.2s ease, color 0.2s ease; display: inline-block; transform-origin: left center; }
+
+    /* HIỆU ỨNG HIỂN THỊ ĐIỂM NỔ LẺ */
+    .floating-win-text { position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); color: #ffea00; font-size: clamp(1.8rem, 7vw, 3rem); font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 0 0 20px #ff9800, 3px 3px 5px #000; -webkit-text-stroke: 1.5px #6d4c00; z-index: 99999; pointer-events: none; animation: floatUpFade 1.6s ease-out forwards; white-space: nowrap; }
+    @keyframes floatUpFade { 0% { opacity: 0; transform: translate(-50%, -10%) scale(0.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); } 80% { opacity: 1; transform: translate(-50%, -70%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -130%) scale(0.9); } }
+
+    /* HIỆU ỨNG +5 RETRIGGER */
+    .flying-plus-5 { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.1); color: #00ffff; font-size: 4.5rem; font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 0 0 20px #fff, 0 0 40px #00ffff, 3px 3px 5px #000; -webkit-text-stroke: 2px #0055ff; z-index: 100000; pointer-events: none; opacity: 0; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; }
+    .flying-plus-5.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    .flying-plus-5.fly { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; transition: transform 0.6s cubic-bezier(0.5, 0, 0.2, 1), opacity 0.6s ease; }
+
+    /* NÚT CHUNG */
+    .btn-shop, .btn-napthit { position: absolute; bottom: 26vh; width: 14vw; max-width: 65px; aspect-ratio: 1 / 1; border-radius: 50%; border: 3px solid #ffcc00; cursor: pointer; z-index: 99999; object-fit: cover; transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); -webkit-tap-highlight-color: transparent; }
+    .btn-shop { right: 4%; box-shadow: 0 0 15px #ff9800, inset 0 0 10px rgba(0,0,0,0.5); }
+    .btn-napthit { left: 4%; box-shadow: 0 0 15px #ff5722, inset 0 0 10px rgba(0,0,0,0.5); }
+    .btn-shop:active, .btn-napthit:active { transform: scale(0.85); box-shadow: 0 0 5px #ff9800; }
+
+    /* BOTTOM CONSOLE */
+    .bottom-console { width: 100vw; max-width: 480px; aspect-ratio: 2.2 / 1; background: url('console-bg.png') no-repeat center center; background-size: 100% 100%; position: relative; margin-top: auto; margin-bottom: 2vh; z-index: 9999; filter: drop-shadow(0px -5px 10px rgba(0,0,0,0.5)); }
+    .display-box { position: absolute; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding-left: 14px; gap: 6px; color: #ffcc00; font-family: 'Arial Black', sans-serif; text-shadow: 1px 1px 3px #000; }
+    .display-balance { top: 10%; left: 6.5%; width: 54%; height: 18%; color: #fff; }
+    .display-trade { top: 73%; left: 5%; width: 30%; height: 18%; }
+    .display-maxwin { top: 73%; left: 65%; width: 30%; height: 18%; }
+    .display-multiplier { top: 10%; left: 64%; width: 31%; height: 18%; color: #ffffff; gap: 4px; padding-left: 12px; }
+    .display-multiplier .display-lbl { font-size: 0.68rem; letter-spacing: -0.3px; }
+    .display-multiplier .display-val { font-size: 1.05rem; transition: color 0.3s ease; }
+    .display-lbl { font-size: 0.85rem; color: #bcaaa4; text-transform: uppercase; white-space: nowrap; }
+    .display-val { font-size: 1.2rem; white-space: nowrap; }
+    .hitbox { position: absolute; background: transparent; border: none; cursor: pointer; z-index: 10; -webkit-tap-highlight-color: transparent; }
+    .btn-minus { top: 38%; left: 4%; width: 12%; height: 26%; }
+    .btn-plus { top: 38%; left: 18%; width: 12%; height: 26%; }
+    .btn-info { top: 38%; left: 83%; width: 12%; height: 26%; }
+    
+    .btn-switch-game { position: absolute; top: 33%; left: 67%; width: 15%; height: 34%; background: url('icon-chuyengame.png') no-repeat center center; background-size: 100% 100%; border: 2px solid #ffcc00; border-radius: 12px; cursor: pointer; z-index: 15; box-shadow: 0 4px 10px rgba(0,0,0,0.8); transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
+    .btn-switch-game:active { transform: scale(0.9); }
+
+    .spin-hitbox { position: absolute; top: 25%; left: 34.5%; width: 31%; height: 68%; border-radius: 50%; z-index: 15; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .spin-btn-visual { width: 100%; height: 100%; background-image: url('nut-quay.png'); background-repeat: no-repeat; background-position: center center; background-size: cover; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(0, 150, 255, 0.4); transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.1s; }
+
+    /* CÁC HIỆU ỨNG GLOW CHO SKIN */
+    .glow-hapham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px #4caf50, 0 0 25px #388e3c !important; }
+    .glow-linhpham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 20px #ffeb3b, 0 0 40px #ff9800 !important; filter: brightness(1.25); }
+    .glow-sieupham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px #000, 0 0 30px #fff, 0 0 50px #0d47a1 !important; filter: brightness(1.3); }
+    .glow-cucpham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 25px #00e5ff, 0 0 50px #d500f9 !important; filter: brightness(1.35); }
+    .glow-thuongpham { box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 25px #ff4500, 0 0 50px #ff0000 !important; filter: brightness(1.4); }
+    
+    /* CLASS CHUYÊN DỤNG XÓA NỀN ĐEN VIDEO (STACKING CONTEXT FIX) */
+    .spin-btn-screen-fix { 
+        filter: none !important; /* Loại bỏ filter gây vách ngăn Stacking Context */
+        background: transparent !important;
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 25px #ff4500, 0 0 50px #ff0000 !important; /* Giữ lại viền sáng cho video */
+    }
+    .spin-btn-video {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none;
+        mix-blend-mode: screen; -webkit-mix-blend-mode: screen; /* Khử nền đen, hòa trộn thẳng xuống console-bg */
+    }
+
+    .spin-btn-visual.clicking { transform: scale(0.85) rotate(-10deg) !important; filter: brightness(1.8) contrast(1.2) !important; }
+
+    /* HIỆU ỨNG KHÓI ĐỎ RỰC RỠ TỪ NÚT SPIN (Tạo bằng JS) */
+    .red-smoke-particle { position: fixed; width: 40px; height: 40px; background: radial-gradient(circle, rgba(255, 50, 0, 0.9) 0%, rgba(200, 0, 0, 0.6) 50%, transparent 100%); border-radius: 50%; pointer-events: none; z-index: 10000; opacity: 0; filter: blur(3px); animation: explodeSmoke 0.9s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; }
+    @keyframes explodeSmoke { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; filter: blur(2px) brightness(2); } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(4); opacity: 0; filter: blur(8px) brightness(1); } }
+
+    /* MODALS */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 999999; pointer-events: auto; }
+    .modal-overlay.active { display: flex; }
+    .info-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
+    .info-wrapper img { max-width: 90vw; max-height: 90vh; width: auto; height: auto; display: block; }
+    #bonus-modal .info-wrapper img, #end-fs-modal .info-wrapper img, #switch-modal .info-wrapper img, #custom-shop-alert .info-wrapper img, #shop-confirm-modal .info-wrapper img, #napthit-confirm-modal .info-wrapper img, #password-unlock-modal .info-wrapper img { border: 4px solid #ffd700; border-radius: 12px; box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.5); }
+    .close-info-hitbox { position: absolute; bottom: 2%; left: 20%; width: 60%; height: 12%; cursor: pointer; z-index: 10; background: transparent; }
+    .start-fs-hitbox { position: absolute; bottom: 2%; left: 30%; width: 40%; height: 15%; cursor: pointer; z-index: 10; background: transparent; }
+    #end-fs-amount { position: absolute; top: 70%; left: 50%; transform: translateX(-50%); font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 900; font-family: 'Arial Black', sans-serif; color: #fffbcc; text-shadow: 0 0 25px #ffea00, 0 0 50px #ff9800, 3px 3px 5px #000; -webkit-text-stroke: 1.5px #6d4c00; margin: 0; pointer-events: none; white-space: nowrap; }
+
+    /* SHOP CÓ TAB NAV */
+    .shop-bg-container, .nap-bg-container { position: relative; width: 95vw; max-width: 450px; display: flex; justify-content: center; align-items: center; }
+    .shop-bg-img, .nap-bg-img { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.8)); }
+    
+    .shop-tabs { position: absolute; top: 13.5%; left: 11%; width: 78%; display: flex; justify-content: space-between; z-index: 21; background: rgba(0,0,0,0.6); border-radius: 6px; padding: 3px; gap: 2px; }
+    .shop-tab-btn { background: transparent; border: none; color: #bcaaa4; font-size: clamp(0.55rem, 2.5vw, 0.75rem); font-weight: bold; padding: 6px 2px; cursor: pointer; text-transform: uppercase; flex: 1; text-align: center; border-radius: 4px; transition: all 0.2s; white-space: nowrap; }
+    .shop-tab-btn.active { background: linear-gradient(180deg, #ffcc00 0%, #ff8800 100%); color: #000; box-shadow: 0 0 8px #ff9800; }
+    
+    .shop-content-area { position: absolute; top: 22%; left: 11%; width: 78%; height: 59.5%; overflow-y: auto; padding-right: 5px; }
+    .shop-content-area::-webkit-scrollbar { width: 6px; }
+    .shop-content-area::-webkit-scrollbar-thumb { background: #5a753c; border-radius: 4px; }
+    
+    .shop-close-hitbox, .nap-close-hitbox { position: absolute; bottom: 5%; left: 20%; width: 60%; height: 8%; cursor: pointer; z-index: 20; background: transparent; -webkit-tap-highlight-color: transparent; }
+    .shop-close-hitbox { bottom: auto; top: 83%; left: 40%; width: 20%; } 
+    .shop-balance-display { position: absolute; top: 93.5%; left: 25%; width: 50%; height: 4.5%; display: flex; justify-content: center; align-items: center; color: #ffcc00; font-family: 'Arial Black', sans-serif; font-size: clamp(0.8rem, 3.5vw, 1.1rem); font-weight: 900; text-shadow: 1px 1px 2px #000; pointer-events: none; z-index: 25; }
+    .shop-items-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding-bottom: 10px; }
+    .shop-item { background: url('bg-item.jpg') no-repeat center center; background-size: 100% 100%; border: none; padding: 18px 20px 18px 32px; display: flex; align-items: flex-start; justify-content: flex-start; position: relative; margin-bottom: 12px; min-height: 125px; }
+    .shop-item-img-box { position: relative; width: 55px; height: 55px; border-radius: 50%; background: #000; border: 2px solid #ffcc00; flex-shrink: 0; box-shadow: 0 0 8px #000; margin-top: 5px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .shop-item-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .shop-item-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border-radius: 50%; z-index: 2; }
+    .shop-item-info { flex: 1; text-align: left; padding-left: 12px; padding-right: 0px; display: flex; flex-direction: column; justify-content: flex-start; width: 100%; }
+    .shop-item-name { color: #ffcc00; font-weight: bold; font-size: 1.05rem; margin-bottom: 2px; text-shadow: 1px 1px 3px #000; white-space: nowrap; }
+    .shop-item-rarity { color: #df98ff; font-size: 0.8rem; margin-bottom: 4px; font-style: italic; white-space: nowrap; }
+    .shop-item-price { color: #00ffcc; font-size: 0.95rem; font-weight: bold; text-shadow: 1px 1px 2px #000; white-space: nowrap; }
+    .shop-item-action { position: absolute; bottom: 15px; right: 25px; display: flex; justify-content: center; align-items: center; z-index: 10; }
+    .shop-btn-buy { background: linear-gradient(180deg, #ff5722 0%, #d84315 100%); color: white; border: 2px solid #ffcc00; padding: 0; border-radius: 6px; font-weight: 900; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.8); width: 85px; height: 35px; }
+    .shop-btn-buy:active { transform: scale(0.9); }
+    .shop-btn-equip { background: linear-gradient(180deg, #4caf50 0%, #1b5e20 100%); color: white; border: 2px solid #aed581; padding: 0; border-radius: 6px; font-weight: 900; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.8); width: 85px; height: 35px; }
+    .shop-btn-equip:active { transform: scale(0.9); }
+    .shop-btn-equipped { background: #555; color: #aaa; border: 2px solid #888; padding: 0; border-radius: 6px; font-weight: 900; cursor: default; width: 85px; height: 35px; }
+
+    #qr-modal .nap-bg-container { cursor: pointer; }
+    .hitbox-nap { position: absolute; background: transparent; cursor: pointer; z-index: 20; -webkit-tap-highlight-color: transparent; }
+    .nap-10k-dau { top: 16%; left: 10%; width: 38%; height: 21%; }
+    .nap-10k-thuong { top: 16%; left: 52%; width: 38%; height: 21%; }
+    .nap-100k { top: 39%; left: 10%; width: 38%; height: 21%; }
+    .nap-500k { top: 39%; left: 52%; width: 38%; height: 21%; }
+    .nap-1000k { top: 62%; left: 10%; width: 38%; height: 21%; }
+    .nap-5m { top: 62%; left: 52%; width: 38%; height: 21%; }
+  </style>
+</head>
+<body>
+
+  <!-- AUDIO POOLS -->
+  <div style="display:none;">
+    <audio class="slash-audio" preload="auto"><source src="chem.mp3" type="audio/mpeg"></audio>
+    <audio class="slash-audio" preload="auto"><source src="chem.mp3" type="audio/mpeg"></audio>
+    <audio class="slash-audio" preload="auto"><source src="chem.mp3" type="audio/mpeg"></audio>
+    <audio class="slash-audio" preload="auto"><source src="chem.mp3" type="audio/mpeg"></audio>
+    <audio class="slash-audio" preload="auto"><source src="chem.mp3" type="audio/mpeg"></audio>
+    
+    <audio class="coin-audio" preload="auto"><source src="tien.mp3" type="audio/mpeg"></audio>
+    <audio class="coin-audio" preload="auto"><source src="tien.mp3" type="audio/mpeg"></audio>
+    <audio class="coin-audio" preload="auto"><source src="tien.mp3" type="audio/mpeg"></audio>
+  </div>
+
+  <audio id="bgm" loop preload="auto"><source src="templemusic_2.mp3" type="audio/mpeg"></audio>
+
+  <!-- ĐĂNG NHẬP -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <div class="login-title">KHO BÁU RỪNG XANH</div>
+      <div class="login-desc">Nhập tên & mật khẩu để kết nối</div>
+      <input type="text" id="username-input" placeholder="Nhập tên của bạn..." autocomplete="off">
+      <input type="password" id="password-input" placeholder="Nhập mật khẩu..." autocomplete="off">
+      <button class="login-btn" onclick="handleLogin()">VÀO GAME</button>
+    </div>
+  </div>
+
+  <div class="lion-dark-backdrop"></div>
+
+  <div class="top-hud">
+    <div class="top-box active">
+      <div class="top-label">NGƯỜI CHƠI</div>
+      <div class="player-name-val" id="player-name-display">---</div>
+      <button onclick="logout()" style="margin-top: 4px; background: #e74c3c; border: 1px solid #c0392b; color: white; border-radius: 4px; font-size: 0.6rem; padding: 2px 6px; cursor: pointer; width: 100%;">ĐỔI TÀI KHOẢN</button>
+    </div>
+
+    <div class="top-box active">
+      <div class="top-label">VUA SĂN THỊT 👑</div>
+      <div class="top-val" id="top-player-display" style="font-size: 0.85rem; color: #00ffcc;">Đang tải...</div>
+    </div>
+
+    <div class="top-box" id="free-spin-box">
+      <div class="top-label">VÒNG QUAY</div>
+      <div class="top-val" id="free-spin-count">0</div>
+    </div>
+  </div>
+
+  <div class="character-container">
+    <video class="character-video" autoplay loop muted playsinline>
+      <source src="sutu-den.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="slot-container">
+    <div class="slot-frame" id="slot-frame">
+      <div class="slot-grid" id="slot-grid"></div>
+    </div>
+  </div>
+
+  <img src="shop.jpg" class="btn-shop" onclick="requestOpenShop()" alt="Vào Cửa Hàng">
+  <img src="bg-napthit.png" class="btn-napthit" onclick="requestOpenNapThit()" alt="Nạp Thịt">
+
+  <div class="big-win-overlay" id="big-win-overlay">
+    <div class="big-win-title">TỔNG THẮNG:</div>
+    <div class="big-win-amount" id="big-win-amount">0 🥩</div>
+  </div>
+
+  <div class="bottom-console">
+    <button class="hitbox btn-minus" onclick="changeBet(-1)"></button>
+    <button class="hitbox btn-plus" onclick="changeBet(1)"></button>
+    <button class="hitbox btn-info" onclick="showInfo()"></button>
+    <button class="btn-switch-game" onclick="requestSwitchGame('game2.html')" title="Chuyển sang Nhiệm Vụ"></button>
+
+    <div class="display-box display-balance">
+      <span class="display-lbl">TÀI NGUYÊN:</span>
+      <span class="display-val" id="balance" style="color: #fff;">0 🥩</span>
+    </div>
+    <div class="display-box display-multiplier">
+      <span class="display-lbl">TỔNG NHÂN:</span>
+      <span class="display-val" id="global-multiplier" style="color: #ffffff;">0</span>
+    </div>
+    <div class="display-box display-trade">
+      <span class="display-lbl">TRADE:</span>
+      <span class="display-val" id="bet-display-bottom">10</span>
+    </div>
+    <div class="display-box display-maxwin">
+      <span class="display-lbl">KỶ LỤC:</span>
+      <span class="display-val" id="max-win-display">0</span>
+    </div>
+
+    <div class="spin-hitbox" onclick="userClickSpin()">
+      <div class="spin-btn-visual" id="spin-btn"></div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="switch-modal">
+    <div class="info-wrapper">
+      <img src="xacnhan-nhiemvu.png" alt="Xác nhận chuyển game">
+      <div style="position: absolute; top: 25%; left: 10%; width: 80%; text-align: center; color: #fffbcc; font-size: clamp(1.1rem, 4.5vw, 1.6rem); font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 2px 2px 5px #000; pointer-events: none;">Bạn có muốn chuyển sang nhiệm vụ không?</div>
+      <div onclick="confirmSwitchGame()" style="position: absolute; bottom: 12%; left: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+      <div onclick="cancelSwitchGame()" style="position: absolute; bottom: 12%; right: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="custom-shop-alert" style="z-index: 9999999;">
+    <div class="info-wrapper">
+      <img src="xacnhan-nhiemvu.png" alt="Xác nhận">
+      <div id="custom-alert-message" style="position: absolute; top: 25%; left: 8%; width: 84%; text-align: center; color: #fffbcc; font-size: clamp(1rem, 3.5vw, 1.3rem); font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 2px 2px 5px #000; pointer-events: none; display: flex; align-items: center; justify-content: center; height: 50%;"></div>
+      <div onclick="closeCustomAlert(true)" style="position: absolute; bottom: 12%; left: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+      <div onclick="closeCustomAlert(false)" style="position: absolute; bottom: 12%; right: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+    </div>
+  </div>
+
+  <!-- BẢNG NHẬP MẬT KHẨU MỞ KHÓA VẬT PHẨM ĐẶC BIỆT -->
+  <div class="modal-overlay" id="password-unlock-modal" style="z-index: 9999999;">
+    <div class="info-wrapper">
+      <img src="xacnhan-nhiemvu.png" alt="Nhập mật khẩu">
+      <div style="position: absolute; top: 25%; left: 8%; width: 84%; text-align: center; color: #fffbcc; font-size: clamp(0.9rem, 3vw, 1.2rem); font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 2px 2px 5px #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50%;">
+        Nhập mã bí mật để mở khóa:
+        <input type="text" id="special-unlock-input" autocomplete="off" style="width: 80%; margin-top: 10px; padding: 8px; font-size: 1.1rem; text-align: center; border-radius: 8px; border: 2px solid #ffcc00; background: rgba(0,0,0,0.6); color: #fff; font-weight: bold; outline: none;">
+      </div>
+      <div onclick="confirmSpecialUnlock()" style="position: absolute; bottom: 12%; left: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+      <div onclick="cancelSpecialUnlock()" style="position: absolute; bottom: 12%; right: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="shop-confirm-modal">
+    <div class="info-wrapper">
+      <img src="xacnhan-nhiemvu.png" alt="Xác nhận vào Shop">
+      <div style="position: absolute; top: 25%; left: 10%; width: 80%; text-align: center; color: #fffbcc; font-size: clamp(1.1rem, 4.5vw, 1.6rem); font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 2px 2px 5px #000; pointer-events: none; display: flex; align-items: center; justify-content: center; height: 50%;">Bạn có muốn vào Tiệm Thời Gian không?</div>
+      <div onclick="confirmOpenShop()" style="position: absolute; bottom: 12%; left: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+      <div onclick="cancelOpenShop()" style="position: absolute; bottom: 12%; right: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="napthit-confirm-modal">
+    <div class="info-wrapper">
+      <img src="xacnhan-nhiemvu.png" alt="Xác nhận nạp thịt">
+      <div style="position: absolute; top: 25%; left: 10%; width: 80%; text-align: center; color: #fffbcc; font-size: clamp(1.1rem, 4.5vw, 1.6rem); font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 2px 2px 5px #000; pointer-events: none; display: flex; align-items: center; justify-content: center; height: 50%;">Bạn có muốn nạp thêm thịt không?</div>
+      <div onclick="confirmOpenNapThit()" style="position: absolute; bottom: 12%; left: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+      <div onclick="cancelOpenNapThit()" style="position: absolute; bottom: 12%; right: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="shop-modal">
+    <div class="shop-bg-container">
+      <img src="bg-shop.png" class="shop-bg-img" alt="Tiệm Thời Gian">
+      
+      <!-- NAV TABS SHOP -->
+      <div class="shop-tabs" id="shop-tabs">
+          <button class="shop-tab-btn active" onclick="changeShopCategory('Hạ phẩm', this)">Hạ Phẩm</button>
+          <button class="shop-tab-btn" onclick="changeShopCategory('Linh phẩm', this)">Linh Phẩm</button>
+          <button class="shop-tab-btn" onclick="changeShopCategory('Siêu phẩm', this)">Siêu Phẩm</button>
+          <button class="shop-tab-btn" onclick="changeShopCategory('Cực phẩm', this)">Cực Phẩm</button>
+          <button class="shop-tab-btn" onclick="changeShopCategory('Thượng phẩm', this)">Thượng Phẩm</button>
+      </div>
+
+      <div class="shop-content-area"><div class="shop-items-grid" id="shop-items-container"></div></div>
+      <div class="shop-close-hitbox" onclick="closeShop()"></div>
+      <div class="shop-balance-display">Tài nguyên: <span id="shop-balance-val" style="margin-left: 5px; margin-right: 3px;">0</span> 🥩</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="napthit-modal">
+    <div class="nap-bg-container">
+      <img src="bg-giaodiennap.png" class="nap-bg-img" alt="Giao diện nạp thịt">
+      <div class="hitbox-nap nap-10k-dau" onclick="openQR()"></div>
+      <div class="hitbox-nap nap-10k-thuong" onclick="openQR()"></div>
+      <div class="hitbox-nap nap-100k" onclick="openQR()"></div>
+      <div class="hitbox-nap nap-500k" onclick="openQR()"></div>
+      <div class="hitbox-nap nap-1000k" onclick="openQR()"></div>
+      <div class="hitbox-nap nap-5m" onclick="openQR()"></div>
+      <div class="nap-close-hitbox" onclick="closeNapThit()"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="qr-modal" onclick="closeQR()">
+    <div class="nap-bg-container">
+      <img src="bg-maqr.png" class="nap-bg-img" alt="Quét mã QR">
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="bonus-modal">
+    <div class="info-wrapper">
+      <img src="Gemini_Generated_Image_nsw084nsw084nsw0.png" alt="Scatter Bonus">
+      <div class="start-fs-hitbox" onclick="closeModalAndStartFreeSpins()"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="end-fs-modal">
+    <div class="info-wrapper" onclick="closeEndFSModal()" style="cursor: pointer;">
+      <img src="Gemini_Generated_Image_kgngklkgngklkgng.png" alt="Sensational Win">
+      <div id="end-fs-amount">0 🥩</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="info-overlay">
+    <div class="info-wrapper">
+      <img src="huongdan.jpg" alt="Hướng dẫn luật chơi">
+      <div class="close-info-hitbox" onclick="hideInfo()"></div>
+    </div>
+  </div>
+
+  <script>
+    // THAY ĐỔI ĐƯỜNG DẪN NGROK CỦA BẠN VÀO ĐÂY SAU KHI CHẠY LỆNH: ngrok http 8080
+    const NGROK_URL = 'https://ageless-moonscape-junkman.ngrok-free.dev';
+
+    const DOM = {};
+    document.addEventListener("DOMContentLoaded", () => {
+      Object.assign(DOM, {
+        grid: document.getElementById('slot-grid'),
+        frame: document.getElementById('slot-frame'),
+        balance: document.getElementById('balance'),
+        betBottom: document.getElementById('bet-display-bottom'),
+        freeSpinBox: document.getElementById('free-spin-box'),
+        freeSpinCount: document.getElementById('free-spin-count'),
+        globalMult: document.getElementById('global-multiplier'),
+        maxWin: document.getElementById('max-win-display'),
+        spinBtn: document.getElementById('spin-btn'),
+        topPlayer: document.getElementById('top-player-display'),
+        playerName: document.getElementById('player-name-display'),
+        loginOverlay: document.getElementById('login-overlay'),
+        usernameInput: document.getElementById('username-input'),
+        passwordInput: document.getElementById('password-input'),
+        bigWinOverlay: document.getElementById('big-win-overlay'),
+        bigWinTitle: document.querySelector('.big-win-title'),
+        bigWinAmount: document.getElementById('big-win-amount'),
+        bonusModal: document.getElementById('bonus-modal'),
+        endFsModal: document.getElementById('end-fs-modal'),
+        endFsAmount: document.getElementById('end-fs-amount'),
+        shopModal: document.getElementById('shop-modal'),
+        shopItems: document.getElementById('shop-items-container'),
+        shopBalance: document.getElementById('shop-balance-val'),
+        customAlert: document.getElementById('custom-shop-alert'),
+        alertMsg: document.getElementById('custom-alert-message'),
+        switchModal: document.getElementById('switch-modal'),
+        shopConfirm: document.getElementById('shop-confirm-modal'),
+        napConfirm: document.getElementById('napthit-confirm-modal'),
+        napModal: document.getElementById('napthit-modal'),
+        qrModal: document.getElementById('qr-modal'),
+        infoOverlay: document.getElementById('info-overlay'),
+        bgm: document.getElementById('bgm'),
+        pwdModal: document.getElementById('password-unlock-modal'),
+        pwdInput: document.getElementById('special-unlock-input')
+      });
+      
+      const savedUser = localStorage.getItem('Shared_Username');
+      const savedPass = localStorage.getItem('Shared_Password');
+      if (savedUser && savedPass) {
+        DOM.usernameInput.value = savedUser;
+        DOM.passwordInput.value = savedPass;
+        handleLogin();
+      }
+      
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          gridData[r][c] = (r === 0) ? null : getRandomSymbol();
+        }
+      }
+      renderBoard('spin_enter');
+      changeBet(0);
+    });
+
+    function createPRNG(seed) {
+        return function() {
+            var t = seed += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        }
+    }
+    
+    let gameRNG = Math.random; 
+    const SCATTER_SYM = 'SCATTER';
+    const BET_LEVELS = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
+    const UNLOCK_THRESHOLDS = [1, 3, 6, 9, 12, 15];
+    const COLS = 6; const ROWS = 6;
+
+    let balance = 0, betIndex = 0, currentBet = BET_LEVELS[betIndex], maxWin = 0;
+    let gridData = Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+    let unlockedCols = [false, false, false, false, false, false];
+    let freeSpinsLeft = 0, isSpinning = false, inFreeSpinsMode = false, globalMultiplier = 0;
+    let cumulativeTumbles = 0, freeSpinTotalWin = 0, bgmStarted = false, currentUser = '', currentPassword = '';
+    let targetServerBalance = 0, targetServerMaxWin = 0;
+
+    let currentShopCategory = 'Hạ phẩm';
+
+    // DANH SÁCH 7 SKIN
+    const SHOP_ITEMS = [
+      { id: 'skin1', src: 'nut1.png', name: 'Kỳ Đại Ngàn', rarity: 'Hạ phẩm', price: 10000 },
+      { id: 'skin2', src: 'nut2.png', name: 'Linh Đầm Cổ', rarity: 'Hạ phẩm', price: 50000 },
+      { id: 'skin7', src: 'nut6.jpg', name: 'Nạp lần đầu', rarity: 'Linh phẩm', price: 'Vô giá', isPasswordLocked: true },
+      { id: 'skin3', src: 'nut3.png', name: 'Hoàng Kim Sinh Mệnh', rarity: 'Linh phẩm', price: 500000 },
+      { id: 'skin4', src: 'nut4.png', name: 'Băng Phong Ma Trận', rarity: 'Siêu phẩm', price: 1000000 },
+      { id: 'skin5', src: 'nut5.png', name: 'Dạ Quang Huyền Ảo', rarity: 'Cực phẩm', price: 10000000 },
+      { id: 'skin6', src: 'spin6.mp4', name: 'Linh Bảo Rồng Thiên', rarity: 'Thượng phẩm', price: 100000000, isHiddenImg: true }
+    ];
+    let playerShopData = { unlocked: [], equipped: 'nut-quay.png' };
+
+    const SYM_CLASSES = {
+        '🐸': 'frog-cell', '🐟': 'fish-cell', '🐗': 'boar-cell', '🐼': 'panda-cell',
+        '🦅': 'eagle-cell', '🐘': 'elephant-cell', '🦄': 'unicorn-cell', '🐯': 'tiger-cell', '🐲': 'dragon-cell'
+    };
+
+    const getCellDom = (r, c) => DOM.grid.children[r * COLS + c];
+
+    let audioUnlocked = false;
+    function unlockAudio() {
+        if (audioUnlocked) return;
+        const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
+        document.querySelectorAll('.slash-audio, .coin-audio').forEach(el => {
+            el.volume = 0; const p = el.play();
+            if (p !== undefined) p.then(() => { el.pause(); el.currentTime = 0; el.volume = 1.0; }).catch(e=>{});
+        });
+        audioUnlocked = true;
+    }
+
+    let customAlertCallback = null;
+    function showCustomAlert(msg, callback) {
+      unlockAudio(); DOM.alertMsg.innerText = msg; DOM.customAlert.classList.add('active'); customAlertCallback = callback; 
+    }
+    function closeCustomAlert(isYes) {
+      DOM.customAlert.classList.remove('active');
+      if (isYes && customAlertCallback) customAlertCallback();
+      customAlertCallback = null;
+    }
+
+    // ÁP DỤNG SKIN: ĐÃ FIX LỖI ĐEN NỀN BẰNG CLASS .spin-btn-screen-fix
+    function applySpinButtonSkin(src) {
+        DOM.spinBtn.style.backgroundImage = 'none';
+        DOM.spinBtn.innerHTML = ''; 
+        DOM.spinBtn.classList.remove('glow-hapham', 'glow-linhpham', 'glow-sieupham', 'glow-cucpham', 'glow-thuongpham', 'spin-btn-screen-fix');
+
+        if (src && src.endsWith('.mp4')) {
+            // FIX: Gắn class để loại bỏ filter, ép thẻ div cha hòa trộn trực tiếp với nền console
+            DOM.spinBtn.classList.add('spin-btn-screen-fix'); 
+            
+            const vid = document.createElement('video');
+            vid.className = 'spin-btn-video';
+            vid.src = src;
+            vid.muted = true;
+            vid.playsInline = true;
+            vid.loop = false;
+            vid.id = 'spin-video-element';
+            
+            vid.addEventListener('loadedmetadata', () => { vid.currentTime = 0.1; });
+            vid.addEventListener('ended', () => { vid.currentTime = 0.1; vid.pause(); });
+            DOM.spinBtn.appendChild(vid);
+        } else {
+            DOM.spinBtn.style.backgroundImage = `url('${src}')`;
+            DOM.spinBtn.style.backgroundSize = 'cover';
+            DOM.spinBtn.style.backgroundPosition = 'center center';
+            DOM.spinBtn.style.borderRadius = '50%';
+        }
+
+        const item = SHOP_ITEMS.find(i => i.src === src);
+        if (item) {
+            if (item.rarity === 'Hạ phẩm') DOM.spinBtn.classList.add('glow-hapham');
+            else if (item.rarity === 'Linh phẩm') DOM.spinBtn.classList.add('glow-linhpham');
+            else if (item.rarity === 'Siêu phẩm') DOM.spinBtn.classList.add('glow-sieupham');
+            else if (item.rarity === 'Cực phẩm') DOM.spinBtn.classList.add('glow-cucpham');
+            else if (item.rarity === 'Thượng phẩm' && !src.endsWith('.mp4')) DOM.spinBtn.classList.add('glow-thuongpham');
+        }
+    }
+
+    async function handleLogin() {
+      unlockAudio(); 
+      const nameInput = DOM.usernameInput.value.trim();
+      const passInput = DOM.passwordInput.value.trim();
+      if (!nameInput || !passInput) { alert("Vui lòng nhập đầy đủ tên và mật khẩu!"); return; }
+      
+      const loginBtn = document.querySelector('.login-btn');
+      loginBtn.innerText = "ĐANG KẾT NỐI..."; loginBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${NGROK_URL}/login`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify({ username: nameInput, password: passInput }) });
+        const data = await response.json();
+
+        if (!response.ok) { alert(data.error || "Lỗi đăng nhập!"); loginBtn.innerText = "VÀO GAME"; loginBtn.disabled = false; return; }
+        
+        currentUser = nameInput; currentPassword = passInput;
+        localStorage.setItem('Shared_Username', currentUser); localStorage.setItem('Shared_Password', currentPassword);
+        
+        balance = data.balance; maxWin = data.maxWin;   
+        playerShopData = data.shopData || { unlocked: [], equipped: 'nut-quay.png' };
+
+        DOM.playerName.innerText = currentUser; DOM.maxWin.innerText = maxWin.toLocaleString();
+        updateBalanceUI(); applySpinButtonSkin(playerShopData.equipped);
+        DOM.loginOverlay.style.display = 'none';
+        playBgmIfPaused();
+      } catch (err) {
+        alert("Không thể kết nối đến Máy chủ!"); loginBtn.innerText = "VÀO GAME"; loginBtn.disabled = false;
+      }
+    }
+
+    function logout() { localStorage.removeItem('Shared_Username'); localStorage.removeItem('Shared_Password'); window.location.reload(); }
+
+    async function fetchTopPlayer() {
+      try {
+        const response = await fetch(`${NGROK_URL}/top-player`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+        if (response.ok) {
+          const data = await response.json();
+          if (DOM.topPlayer) DOM.topPlayer.innerText = `${data.username} (${data.balance.toLocaleString()} 🥩)`;
+        }
+      } catch (err) {}
+    }
+    setInterval(fetchTopPlayer, 5000);
+
+    function updateBalanceUI() {
+      if (DOM.balance) DOM.balance.innerText = balance.toLocaleString() + ' 🥩';
+      if (DOM.shopBalance) DOM.shopBalance.innerText = balance.toLocaleString();
+    }
+
+    function requestOpenShop() { unlockAudio(); if (!isSpinning && !inFreeSpinsMode) DOM.shopConfirm.classList.add('active'); }
+    function cancelOpenShop() { DOM.shopConfirm.classList.remove('active'); }
+    function confirmOpenShop() { DOM.shopConfirm.classList.remove('active'); renderShopItems(); DOM.shopModal.classList.add('active'); }
+    function closeShop() { DOM.shopModal.classList.remove('active'); }
+
+    function requestOpenNapThit() { unlockAudio(); if (!isSpinning && !inFreeSpinsMode) DOM.napConfirm.classList.add('active'); }
+    function cancelOpenNapThit() { DOM.napConfirm.classList.remove('active'); }
+    function confirmOpenNapThit() { DOM.napConfirm.classList.remove('active'); DOM.napModal.classList.add('active'); }
+    function closeNapThit() { DOM.napModal.classList.remove('active'); }
+
+    function openQR() { unlockAudio(); DOM.qrModal.classList.add('active'); }
+    function closeQR() { DOM.qrModal.classList.remove('active'); }
+
+    let pendingSpecialUnlockId = null;
+    function promptSpecialUnlock(id) {
+        unlockAudio();
+        pendingSpecialUnlockId = id;
+        DOM.pwdInput.value = '';
+        DOM.pwdModal.classList.add('active');
+    }
+    function cancelSpecialUnlock() {
+        DOM.pwdModal.classList.remove('active');
+        pendingSpecialUnlockId = null;
+    }
+    async function confirmSpecialUnlock() {
+        const code = DOM.pwdInput.value.trim();
+        DOM.pwdModal.classList.remove('active');
+        if(!code) return;
+
+        try {
+            const response = await fetch(`${NGROK_URL}/shop_unlock_special`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ username: currentUser, password: currentPassword, item_id: pendingSpecialUnlockId, code: code })
+            });
+            const data = await response.json();
+            if (!data.success) { showCustomAlert(data.error, null); return; }
+            playerShopData = data.shopData;
+            renderShopItems();
+            showCustomAlert("Mở khóa thành công!", null);
+        } catch (err) {
+            showCustomAlert("Lỗi kết nối", null);
+        }
+    }
+
+    function changeShopCategory(category, btnElement) {
+        unlockAudio();
+        currentShopCategory = category;
+        const tabs = document.querySelectorAll('.shop-tab-btn');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        if (btnElement) btnElement.classList.add('active');
+        renderShopItems();
+    }
+
+    function renderShopItems() {
+      DOM.shopItems.innerHTML = ''; 
+      
+      const filteredItems = SHOP_ITEMS.filter(item => item.rarity.toLowerCase() === currentShopCategory.toLowerCase());
+
+      if (filteredItems.length === 0) {
+          DOM.shopItems.innerHTML = `<div style="text-align:center; color:#ccc; padding: 20px; font-weight: bold; width: 100%;">Chưa có vật phẩm nào ở cấp bậc này.</div>`;
+          return;
+      }
+
+      filteredItems.forEach(item => {
+        let isUnlocked = playerShopData.unlocked.includes(item.id);
+        let isEquipped = playerShopData.equipped === item.src;
+        
+        let actionBtn;
+        if (!isUnlocked) {
+            if (item.isPasswordLocked) {
+                actionBtn = `<button class="shop-btn-buy" onclick="promptSpecialUnlock('${item.id}')">MỞ</button>`;
+            } else {
+                actionBtn = `<button class="shop-btn-buy" onclick="buyShopItem('${item.id}', ${item.price})">MUA</button>`;
+            }
+        } else if (isEquipped) {
+            actionBtn = `<button class="shop-btn-equipped">ĐANG DÙNG</button>`;
+        } else {
+            actionBtn = `<button class="shop-btn-equip" onclick="equipShopItem('${item.src}')">KÍCH HOẠT</button>`;
+        }
+        
+        let imgContent = item.isHiddenImg 
+            ? `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #ff5722; font-weight: 900; background: #1a1a1a;">?</div>` 
+            : `<img src="${item.src}" class="shop-item-img">`;
+
+        let displayPrice = item.price === 'Vô giá' ? 'Vô giá' : item.price.toLocaleString() + ' 🥩';
+
+        DOM.shopItems.innerHTML += `
+          <div class="shop-item">
+            <div class="shop-item-img-box">${imgContent}${!isUnlocked ? '<div class="shop-item-lock">🔒</div>' : ''}</div>
+            <div class="shop-item-info">
+              <div class="shop-item-name">${item.name}</div><div class="shop-item-rarity">Phân loại: ${item.rarity}</div>
+              <div class="shop-item-price">${isUnlocked ? 'Đã sở hữu' : displayPrice}</div>
+            </div>
+            <div class="shop-item-action">${actionBtn}</div>
+          </div>`;
+      });
+    }
+
+    async function buyShopItem(id, price) {
+      if (balance < price) { showCustomAlert("Bạn không đủ Thịt 🥩!", null); return; }
+      showCustomAlert(`Mở khóa vật phẩm này với giá ${price.toLocaleString()} Thịt?`, async () => {
+        try {
+            const response = await fetch(`${NGROK_URL}/shop_buy`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify({ username: currentUser, password: currentPassword, price: price, item_id: id }) });
+            const data = await response.json();
+            if (!data.success) { showCustomAlert(data.error, null); return; } 
+            balance = data.balance; playerShopData = data.shopData; updateBalanceUI(); renderShopItems(); 
+        } catch (err) {}
+      });
+    }
+
+    async function equipShopItem(src) {
+      showCustomAlert("Kích hoạt và sử dụng nút spin này?", async () => {
+        try {
+            const response = await fetch(`${NGROK_URL}/shop_equip`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify({ username: currentUser, password: currentPassword, equip_src: src }) });
+            const data = await response.json();
+            if (data.success) { playerShopData = data.shopData; applySpinButtonSkin(playerShopData.equipped); renderShopItems(); }
+        } catch (err) {}
+      });
+    }
+
+    let targetGameUrl = '';
+    function requestSwitchGame(url) { unlockAudio(); if (!currentUser) { alert("Vui lòng đăng nhập!"); return; } targetGameUrl = url; DOM.switchModal.classList.add('active'); }
+    function cancelSwitchGame() { DOM.switchModal.classList.remove('active'); }
+    function confirmSwitchGame() { DOM.switchModal.classList.remove('active'); window.location.href = targetGameUrl; }
+
+    function playBgmIfPaused() { if (!bgmStarted && DOM.bgm) { DOM.bgm.volume = 0.2; DOM.bgm.play().then(() => bgmStarted = true).catch(e=>{}); } }
+    function showInfo() { if (!isSpinning) DOM.infoOverlay.classList.add('active'); }
+    function hideInfo() { DOM.infoOverlay.classList.remove('active'); }
+
+    let scatterPosterDataUrl = '';
+    const extractScatterFrame = () => {
+      const hiddenVid = document.createElement('video'); hiddenVid.muted = true; hiddenVid.playsInline = true; hiddenVid.src = 'symbolscatter.mp4';
+      hiddenVid.addEventListener('loadeddata', () => hiddenVid.currentTime = 0.5);
+      hiddenVid.addEventListener('seeked', () => {
+        try {
+          const canvas = document.createElement('canvas'); canvas.width = hiddenVid.videoWidth || 200; canvas.height = hiddenVid.videoHeight || 200;
+          canvas.getContext('2d').drawImage(hiddenVid, 0, 0, canvas.width, canvas.height); scatterPosterDataUrl = canvas.toDataURL('image/jpeg');
+          document.querySelectorAll('.scatter-video-element').forEach(v => { if (!v.poster) v.poster = scatterPosterDataUrl; });
+        } catch(e) {}
+      });
+    };
+    extractScatterFrame();
+
+    const PAYTABLE = {
+      '🐸': [ {min: 15, val: 25}, {min: 12, val: 9}, {min: 10, val: 6}, {min: 8, val: 4} ], '🐗': [ {min: 15, val: 30}, {min: 12, val: 10}, {min: 10, val: 7}, {min: 8, val: 5} ],
+      '🐟': [ {min: 15, val: 40}, {min: 12, val: 15}, {min: 10, val: 9}, {min: 8, val: 7} ], '🐼': [ {min: 15, val: 50}, {min: 12, val: 20}, {min: 10, val: 10}, {min: 8, val: 9} ],
+      '🦅': [ {min: 15, val: 75}, {min: 12, val: 30}, {min: 10, val: 15}, {min: 8, val: 10} ], '🐘': [ {min: 15, val: 100}, {min: 12, val: 40}, {min: 10, val: 20}, {min: 8, val: 12} ],
+      '🐯': [ {min: 15, val: 150}, {min: 12, val: 60}, {min: 10, val: 30}, {min: 8, val: 15} ], '🦄': [ {min: 15, val: 250}, {min: 12, val: 100}, {min: 10, val: 50}, {min: 8, val: 25} ],
+      '🐲': [ {min: 15, val: 500}, {min: 12, val: 200}, {min: 10, val: 100}, {min: 8, val: 50} ], 'SCATTER': [ {min: 6, val: 20}, {min: 5, val: 10}, {min: 4, val: 4} ]
+    };
+    function getBasePayout(sym, count) { if (!PAYTABLE[sym]) return 0; for (let r of PAYTABLE[sym]) if (count >= r.min) return r.val; return 0; }
+
+    let audioCtx = null;
+    function getAudioCtx() { if (audioCtx) return audioCtx; try { const AudioContextClass = window.AudioContext || window.webkitAudioContext; if (AudioContextClass) audioCtx = new AudioContextClass(); } catch(e) {} return audioCtx; }
+    function playTickSound() { const ctx = getAudioCtx(); if (!ctx) return; try { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(800 + Math.random() * 300, ctx.currentTime); gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.05); osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.05); } catch(e) {} }
+    function playSlashSound() { const audios = document.querySelectorAll('.slash-audio'); for (let i = 0; i < audios.length; i++) { if (audios[i].paused || audios[i].ended) { audios[i].volume = 1.0; audios[i].currentTime = 0; audios[i].play().catch(e=>{}); break; } } }
+    function playCoinSound() { const audios = document.querySelectorAll('.coin-audio'); for (let i = 0; i < audios.length; i++) { if (audios[i].paused || audios[i].ended) { audios[i].volume = 1.0; audios[i].currentTime = 0; audios[i].play().catch(e=>{}); break; } } }
+    function playExplodeSound() { const ctx = getAudioCtx(); if (!ctx) return; try { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3); gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.3); osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.3); } catch(e) {} }
+    function playShatterSound() { try { playExplodeSound(); setTimeout(playTickSound, 100); } catch(e) {} }
+
+    function getRandomMultiplierValue() { const r = gameRNG(); return r < 0.001 ? 'x100' : r < 0.011 ? 'x50' : r < 0.061 ? 'x10' : r < 0.161 ? 'x8' : r < 0.311 ? 'x5' : r < 0.511 ? 'x4' : r < 0.711 ? 'x3' : 'x2'; }
+    
+    function getRandomSymbol() {
+      let scatterProb = 0.025, multiProb = currentBet > 1000 ? 0.015 : 0.02;
+      const rand = gameRNG(); 
+      if (rand < scatterProb) return SCATTER_SYM; 
+      if (rand < scatterProb + multiProb) return getRandomMultiplierValue();
+      
+      const symRand = gameRNG(); 
+      return symRand < 0.15 ? '🐸' : 
+             symRand < 0.30 ? '🐗' : 
+             symRand < 0.45 ? '🐟' : 
+             symRand < 0.59 ? '🐼' : 
+             symRand < 0.71 ? '🦅' : 
+             symRand < 0.81 ? '🐘' : 
+             symRand < 0.89 ? '🐯' : 
+             symRand < 0.95 ? '🦄' : '🐲';
+    }
+
+    function changeBet(dir) { if (isSpinning) return; betIndex = Math.max(0, Math.min(BET_LEVELS.length - 1, betIndex + dir)); currentBet = BET_LEVELS[betIndex]; DOM.betBottom.innerText = currentBet.toLocaleString(); }
+
+    function createDebrisEffect(cell) {
+      const rect = cell.getBoundingClientRect();
+      for (let i = 0; i < 25; i++) { 
+        const debris = document.createElement('div'); debris.className = 'shatter-debris';
+        debris.style.left = `${rect.left + rect.width / 2}px`; debris.style.top = `${rect.top + rect.height / 2}px`;
+        const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 80;
+        debris.style.setProperty('--dx', `${Math.cos(a) * d}px`); debris.style.setProperty('--dy', `${Math.sin(a) * d}px`);
+        document.body.appendChild(debris); setTimeout(() => debris.remove(), 800);
+      }
+    }
+
+    function spawnRedSmokeEffect(anchorEl) {
+        const rect = anchorEl.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        for (let i = 0; i < 15; i++) {
+            const smoke = document.createElement('div');
+            smoke.className = 'red-smoke-particle';
+            smoke.style.left = `${centerX}px`;
+            smoke.style.top = `${centerY}px`;
+            
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 80;
+            
+            smoke.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+            smoke.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
+            
+            document.body.appendChild(smoke);
+            setTimeout(() => smoke.remove(), 950);
+        }
+    }
+
+    const applySplitEffect = (cell, sym) => {
+        cell.classList.remove('exploding-prep'); cell.classList.add('exploding-active');
+        if (sym !== SCATTER_SYM) {
+            const originalHTML = cell.innerHTML;
+            const bgClass = SYM_CLASSES[sym] || (sym.startsWith('x') ? 'multiplier-cell' : '');
+            
+            cell.innerHTML = '';
+            cell.style.setProperty('background-image', 'none', 'important'); cell.style.setProperty('background-color', 'transparent', 'important');
+            cell.style.setProperty('border', 'none', 'important'); cell.style.setProperty('box-shadow', 'none', 'important');
+
+            const topHalf = document.createElement('div'); topHalf.className = `split-half top-half ${bgClass}`; topHalf.innerHTML = originalHTML;
+            const bottomHalf = document.createElement('div'); bottomHalf.className = `split-half bottom-half ${bgClass}`; bottomHalf.innerHTML = originalHTML;
+            const slashLine = document.createElement('div'); slashLine.className = 'cell-slash-line';
+            cell.append(topHalf, bottomHalf, slashLine);
+        } else {
+            cell.style.transition = 'opacity 0.4s ease'; cell.style.opacity = '0';
+        }
+    };
+
+    function renderBoard(animType = 'none', animData = {}) {
+      const oldVids = {};
+      if (DOM.grid.children.length > 0) {
+        Array.from(DOM.grid.children).forEach(c => {
+          const r = c.dataset.row, col = c.dataset.col, vid = c.querySelector('.scatter-video-element');
+          if (vid) oldVids[`${r}_${col}`] = vid;
+        });
+      }
+      DOM.grid.innerHTML = '';
+      
+      let shiftMap = {}, dropMap = {};
+      if (animData.shiftedCells) animData.shiftedCells.forEach(item => shiftMap[`${item.r}_${item.c}`] = item.distance);
+      if (animData.newDropCells) animData.newDropCells.forEach(item => dropMap[`${item.r}_${item.c}`] = item.indexInCol);
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const sym = gridData[r][c];
+          const cell = document.createElement('div'); cell.className = 'slot-cell'; cell.dataset.row = r; cell.dataset.col = c;
+
+          if (animType === 'spin_enter' && sym !== null) {
+            if (!(r === 0 && !unlockedCols[c])) { cell.classList.add('roll-in'); cell.style.animationDelay = `${(c * 0.08) + (r * 0.03)}s`; }
+          } else if (animType === 'continuous_spin' && sym !== null) {
+            if (!(r === 0 && !unlockedCols[c])) { cell.classList.add('roll-in-continuous'); cell.style.animationDelay = `${c * 0.1 + 0.7}s`; }
+          } else if (animType === 'tumble') {
+            const dist = shiftMap[`${r}_${c}`]; const dropIdx = dropMap[`${r}_${c}`];
+            if (dist !== undefined) { cell.classList.add('sliding-down-cell'); cell.style.setProperty('--shift-distance', `calc(-${dist * 100}%)`); cell.style.animationDelay = `${c * 0.02}s`; }
+            else if (dropIdx !== undefined) { cell.classList.add('free-symbol-falling'); cell.style.animationDelay = `${c * 0.02 + dropIdx * 0.15}s`; }
+          }
+
+          if (r === 0 && !unlockedCols[c]) {
+            cell.classList.add('locked-cell');
+            cell.style.setProperty('background-image', `url('symbol-khoa${UNLOCK_THRESHOLDS[c]}.png')`, 'important');
+          } else if (sym !== null) {
+            if (sym === SCATTER_SYM) {
+              cell.classList.add('scatter-cell');
+              let oldR = r;
+              if (animType === 'tumble' && shiftMap[`${r}_${c}`] !== undefined) oldR = r - shiftMap[`${r}_${c}`];
+              
+              let vid = oldVids[`${oldR}_${c}`];
+              if (!vid || animType === 'continuous_spin' || animType === 'spin_enter') {
+                  vid = document.createElement('video'); vid.className = 'scatter-video-element'; vid.muted = true; vid.playsInline = true;
+                  if (scatterPosterDataUrl) vid.poster = scatterPosterDataUrl;
+                  vid.src = 'symbolscatter.mp4'; vid.load();
+                  let p = vid.play(); if (p !== undefined) p.then(() => { vid.pause(); vid.currentTime = 0.001; }).catch(e => vid.currentTime = 0.001);
+              }
+              cell.appendChild(vid);
+              const glow = document.createElement('div'); glow.className = 'scatter-glow-border'; cell.appendChild(glow);
+            } 
+            else if (typeof sym === 'string' && sym.startsWith('x')) {
+              cell.classList.add('multiplier-cell'); cell.innerHTML = `<span class="multiplier-text">${sym.toUpperCase()}</span>`;
+            } 
+            else if (SYM_CLASSES[sym]) { cell.classList.add(SYM_CLASSES[sym]); }
+            else { cell.innerText = sym; }
+          }
+          DOM.grid.appendChild(cell);
+        }
+      }
+    }
+
+    function showFloatingWinText(text) {
+        const el = document.createElement('div');
+        el.innerText = text;
+        el.className = 'floating-win-text';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1600);
+    }
+
+    function animateTotalWinAddition(winAmount) {
+        return new Promise(async (resolve) => {
+            if (winAmount <= 0) { resolve(); return; }
+
+            DOM.bigWinOverlay.style.display = 'flex';
+            DOM.bigWinTitle.style.opacity = '1'; DOM.bigWinAmount.style.opacity = '1';
+
+            let duration = 1000, startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                DOM.bigWinAmount.innerText = `${Math.floor(progress * winAmount).toLocaleString()} 🥩`;
+                if (progress < 1) window.requestAnimationFrame(step);
+                else DOM.bigWinAmount.innerText = `${winAmount.toLocaleString()} 🥩`;
+            };
+            window.requestAnimationFrame(step);
+            
+            await new Promise(res => {
+                setTimeout(() => {
+                    DOM.bigWinTitle.style.opacity = '0';
+                    setTimeout(() => {
+                        const rectAmt = DOM.bigWinAmount.getBoundingClientRect(), rectBal = DOM.balance.getBoundingClientRect();
+                        const deltaX = rectBal.left + rectBal.width/2 - (rectAmt.left + rectAmt.width/2);
+                        const deltaY = rectBal.top + rectBal.height/2 - (rectAmt.top + rectBal.height/2);
+
+                        const flyingEl = DOM.bigWinAmount.cloneNode(true);
+                        flyingEl.style.position = 'fixed'; flyingEl.style.left = `${rectAmt.left}px`; flyingEl.style.top = `${rectAmt.top}px`;
+                        flyingEl.style.margin = '0'; flyingEl.style.zIndex = '100001'; flyingEl.style.transition = 'all 0.6s cubic-bezier(0.5, 0, 0.2, 1)';
+                        document.body.appendChild(flyingEl);
+
+                        DOM.bigWinAmount.style.opacity = '0'; void flyingEl.offsetWidth; 
+                        flyingEl.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.3)`; flyingEl.style.opacity = '0';
+
+                        setTimeout(() => {
+                            flyingEl.remove(); DOM.bigWinOverlay.style.display = 'none'; DOM.bigWinAmount.style.opacity = '1'; 
+                            DOM.balance.style.transform = 'scale(1.5)'; DOM.balance.style.color = '#00ffcc'; playCoinSound();
+                            
+                            let balDur = 600, balStart = null;
+                            const oldBal = parseInt(DOM.balance.innerText.replace(/[^0-9]/g, '')) || 0;
+                            const balStep = (t) => {
+                                if (!balStart) balStart = t;
+                                const p = Math.min((t - balStart) / balDur, 1);
+                                DOM.balance.innerText = `${(oldBal + Math.floor(p * winAmount)).toLocaleString()} 🥩`;
+                                if (p < 1) window.requestAnimationFrame(balStep);
+                                else { DOM.balance.style.transform = 'scale(1)'; DOM.balance.style.color = '#fff'; setTimeout(res, 200); }
+                            };
+                            window.requestAnimationFrame(balStep);
+                        }, 600); 
+                    }, 300);
+                }, 1200); 
+            });
+            resolve();
+        });
+    }
+
+    async function userClickSpin() {
+      unlockAudio(); 
+      if (!currentUser) { DOM.loginOverlay.style.display = 'flex'; return; }
+      playBgmIfPaused(); if (isSpinning || inFreeSpinsMode) return;
+      if (balance < currentBet) { showCustomAlert("Bạn không đủ Thịt 🥩!", null); return; }
+
+      if (DOM.spinBtn) { 
+          DOM.spinBtn.classList.add('clicking'); 
+          setTimeout(() => DOM.spinBtn.classList.remove('clicking'), 200); 
+
+          const spinVid = document.getElementById('spin-video-element');
+          if (spinVid) {
+              spinVid.currentTime = 0;
+              spinVid.play().catch(e => {});
+              spawnRedSmokeEffect(DOM.spinBtn.parentElement);
+          }
+      }
+
+      isSpinning = true; 
+      try {
+        const response = await fetch(`${NGROK_URL}/spin`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify({ username: currentUser, password: currentPassword, bet: currentBet }) });
+        const data = await response.json();
+        if (!data.success) { showCustomAlert(data.error, null); isSpinning = false; return; }
+
+        gameRNG = createPRNG(data.seed);
+        targetServerBalance = data.balance; targetServerMaxWin = data.maxWin;
+        balance -= currentBet; updateBalanceUI();
+        
+        let triggeredFS = await runSingleSpin();
+        if (!triggeredFS) {
+            balance = targetServerBalance; maxWin = targetServerMaxWin;
+            updateBalanceUI(); DOM.maxWin.innerText = maxWin.toLocaleString();
+            isSpinning = false; 
+        }
+      } catch (err) { isSpinning = false; }
+    }
+
+    async function runSingleSpin() {
+      if (!inFreeSpinsMode) { 
+          globalMultiplier = 0; 
+          DOM.globalMult.innerText = '0'; 
+          DOM.globalMult.style.color = '#ffffff'; 
+          cumulativeTumbles = 0; 
+          unlockedCols = [false, false, false, false, false, false]; 
+      }
+
+      const clonedGrid = DOM.grid.cloneNode(true); clonedGrid.id = 'cloned-grid';
+      clonedGrid.style.position = 'absolute'; clonedGrid.style.top = DOM.grid.offsetTop + 'px'; clonedGrid.style.left = DOM.grid.offsetLeft + 'px';
+      clonedGrid.style.width = DOM.grid.offsetWidth + 'px'; clonedGrid.style.height = DOM.grid.offsetHeight + 'px';
+      clonedGrid.style.overflow = 'hidden'; clonedGrid.style.clipPath = 'inset(0)'; clonedGrid.style.zIndex = '11'; clonedGrid.style.pointerEvents = 'none';
+      DOM.frame.appendChild(clonedGrid);
+
+      const cloneVids = clonedGrid.querySelectorAll('.scatter-video-element'), origVids = DOM.grid.querySelectorAll('.scatter-video-element');
+      for(let i=0; i<origVids.length; i++){
+          if(cloneVids[i] && origVids[i]) { cloneVids[i].currentTime = origVids[i].currentTime > 0 ? origVids[i].currentTime : 0.001; if (scatterPosterDataUrl) cloneVids[i].poster = scatterPosterDataUrl; cloneVids[i].pause(); }
+      }
+
+      DOM.grid.innerHTML = '';
+      clonedGrid.querySelectorAll('.slot-cell').forEach((cell) => {
+        const c = parseInt(cell.dataset.col), r = parseInt(cell.dataset.row);
+        if (!(r === 0 && !unlockedCols[c])) { cell.style.animation = `rollOutDownContinuous 0.5s cubic-bezier(0.5, 0, 1, 1) forwards`; cell.style.animationDelay = `${c * 0.1}s`; } else cell.style.opacity = '0'; 
+      });
+      setTimeout(() => { if(clonedGrid.parentNode) clonedGrid.remove(); }, 1500);
+
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) gridData[r][c] = (r === 0 && !unlockedCols[c]) ? null : getRandomSymbol();
+
+      renderBoard('continuous_spin');
+      for (let c = 0; c < COLS; c++) setTimeout(playTickSound, 1100 + (c * 100)); 
+      await new Promise(res => setTimeout(res, 1800));
+      return await runTumbleEngine();
+    }
+
+    async function runTumbleEngine() {
+      let isTumbling = true, scatterTriggeredThisSpin = false;
+      let spinBaseWinTotal = 0;
+      let spinTotalMultiplier = 0;
+
+      while (isTumbling) {
+        const counts = {}; let scatterCount = 0, scatterAudioPlayed = false;
+        let multCellsThisStep = [];
+        
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (r === 0 && !unlockedCols[c]) continue;
+            const sym = gridData[r][c]; if (!sym) continue;
+            if (sym === SCATTER_SYM) scatterCount++;
+            else if (typeof sym === 'string' && sym.startsWith('x')) {
+                multCellsThisStep.push({r, c, sym, val: parseInt(sym.replace('x', ''))});
+            }
+            else counts[sym] = (counts[sym] || 0) + 1;
+          }
+        }
+        if (scatterCount > 0) counts[SCATTER_SYM] = scatterCount;
+        if (scatterCount >= 4 && !inFreeSpinsMode && !scatterTriggeredThisSpin) scatterTriggeredThisSpin = true;
+
+        const winningSymbols = Object.keys(counts).filter(sym => sym === SCATTER_SYM ? counts[sym] >= 4 : counts[sym] >= 8);
+        
+        let hasAction = inFreeSpinsMode 
+            ? (winningSymbols.length > 0 || multCellsThisStep.length > 0)
+            : (winningSymbols.length > 0);
+
+        if (hasAction) {
+            let stepBaseWin = 0;
+            let scatterRetriggeredThisStep = winningSymbols.includes(SCATTER_SYM) && inFreeSpinsMode;
+            if (winningSymbols.length > 0) cumulativeTumbles++; 
+          
+            winningSymbols.forEach(sym => stepBaseWin += getBasePayout(sym, counts[sym]) * (currentBet / 10));
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (r === 0 && !unlockedCols[c]) continue;
+                    let sym = gridData[r][c];
+                    let isWinSym = winningSymbols.includes(sym);
+                    let isMultSym = multCellsThisStep.some(m => m.r === r && m.c === c);
+
+                    if (isWinSym || (inFreeSpinsMode && isMultSym) || (!inFreeSpinsMode && isMultSym && winningSymbols.length > 0)) {
+                        const cell = getCellDom(r, c);
+                        if (cell) {
+                            cell.classList.add('exploding-prep');
+                            if (sym === SCATTER_SYM) {
+                                const vid = cell.querySelector('.scatter-video-element');
+                                if (vid) {
+                                    vid.currentTime = 0; 
+                                    if (scatterTriggeredThisSpin && !scatterAudioPlayed) { if (DOM.bgm) DOM.bgm.pause(); vid.muted = false; scatterAudioPlayed = true; } else vid.muted = true; 
+                                    vid.play().catch(e => {});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            await new Promise(res => setTimeout(res, 1100));
+            if (winningSymbols.includes(SCATTER_SYM)) await new Promise(res => setTimeout(res, 3500));
+
+            playSlashSound(); DOM.frame.classList.add('shake-active'); setTimeout(() => DOM.frame.classList.remove('shake-active'), 400);
+
+            const globalSlash = document.createElement('div'); globalSlash.className = 'global-slash'; DOM.grid.appendChild(globalSlash);
+            setTimeout(() => { if (globalSlash.parentNode) globalSlash.remove(); }, 600);
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (r === 0 && !unlockedCols[c]) continue;
+                    if (winningSymbols.includes(gridData[r][c])) {
+                        const cell = getCellDom(r, c); if (cell) applySplitEffect(cell, gridData[r][c]);
+                        gridData[r][c] = null;
+                    }
+                }
+            }
+
+            if (inFreeSpinsMode) {
+                if (multCellsThisStep.length > 0) {
+                    multCellsThisStep.forEach(item => {
+                        globalMultiplier += item.val;
+                        const cell = getCellDom(item.r, item.c);
+                        if (cell) applySplitEffect(cell, item.sym);
+                        gridData[item.r][item.c] = null;
+                    });
+                    DOM.globalMult.innerText = 'x' + globalMultiplier;
+                    DOM.globalMult.style.color = '#00ffcc';
+                }
+
+                let stepFinalWin = stepBaseWin * (globalMultiplier > 0 ? globalMultiplier : 1);
+                freeSpinTotalWin += stepFinalWin;
+
+                if (stepBaseWin > 0) {
+                    if (globalMultiplier > 0) {
+                        showFloatingWinText(`+${stepBaseWin.toLocaleString()} x ${globalMultiplier} = +${stepFinalWin.toLocaleString()}`);
+                    } else {
+                        showFloatingWinText(`+${stepBaseWin.toLocaleString()}`);
+                    }
+                }
+            } else {
+                spinBaseWinTotal += stepBaseWin;
+                multCellsThisStep.forEach(item => {
+                    spinTotalMultiplier += item.val;
+                    const cell = getCellDom(item.r, item.c);
+                    if (cell) applySplitEffect(cell, item.sym);
+                    gridData[item.r][item.c] = null;
+                });
+
+                if (spinTotalMultiplier > 0) {
+                    DOM.globalMult.innerText = 'x' + spinTotalMultiplier;
+                    DOM.globalMult.style.color = '#ff9800';
+                }
+                if (stepBaseWin > 0) {
+                    showFloatingWinText(`+${stepBaseWin.toLocaleString()}`);
+                }
+            }
+
+            if (scatterRetriggeredThisStep) {
+                const flying5 = document.createElement('div'); flying5.innerText = '+ 5'; flying5.className = 'flying-plus-5'; document.body.appendChild(flying5);
+                void flying5.offsetWidth; flying5.classList.add('show'); playTickSound();
+
+                setTimeout(() => {
+                    const bR = DOM.freeSpinBox.getBoundingClientRect(), sX = window.innerWidth / 2, sY = window.innerHeight / 2, tX = bR.left + bR.width / 2, tY = bR.top + bR.height / 2;
+                    flying5.style.setProperty('--dx', `${tX - sX}px`); flying5.style.setProperty('--dy', `${tY - sY}px`);
+                    flying5.classList.remove('show'); flying5.classList.add('fly');
+
+                    setTimeout(() => {
+                        flying5.remove(); freeSpinsLeft += 5; DOM.freeSpinCount.innerText = freeSpinsLeft;
+                        DOM.freeSpinBox.style.transition = 'all 0.2s ease'; DOM.freeSpinBox.style.transform = 'scale(1.4)'; DOM.freeSpinBox.style.filter = 'brightness(2) drop-shadow(0 0 10px #00ffff)';
+                        playTickSound(); setTimeout(() => { DOM.freeSpinBox.style.transform = 'scale(1)'; DOM.freeSpinBox.style.filter = 'brightness(1) drop-shadow(0 0 0px transparent)'; }, 300);
+                    }, 600); 
+                }, 1000); 
+            }
+
+            await new Promise(res => setTimeout(res, 1450));
+
+            let newlyUnlockedCols = [];
+            for (let i = 0; i < COLS; i++) if (!unlockedCols[i] && cumulativeTumbles >= UNLOCK_THRESHOLDS[i]) { unlockedCols[i] = true; newlyUnlockedCols.push(i); }
+
+            if (newlyUnlockedCols.length > 0) {
+                newlyUnlockedCols.forEach(colIndex => {
+                    const lockedCell = getCellDom(0, colIndex);
+                    if (lockedCell) { lockedCell.classList.add('shattering'); createDebrisEffect(lockedCell); }
+                });
+                await new Promise(res => setTimeout(res, 800));
+            }
+
+            const shiftedCells = applyGravityAndTrack(); const newDropCells = fillEmptyTopCells();
+            if (shiftedCells.length > 0 || newDropCells.length > 0) {
+                renderBoard('tumble', { shiftedCells, newDropCells });
+                let activeCols = new Set();
+                shiftedCells.forEach(item => activeCols.add(item.c)); newDropCells.forEach(item => activeCols.add(item.c));
+                Array.from(activeCols).sort().forEach(c => setTimeout(playTickSound, 600 + (c * 50)));
+                await new Promise(res => setTimeout(res, 1200)); 
+            }
+
+            renderBoard('none'); await new Promise(res => setTimeout(res, 50));
+        } else isTumbling = false; 
+      }
+
+      if (!inFreeSpinsMode) {
+          let finalSpinNormalWin = spinBaseWinTotal * (spinTotalMultiplier > 0 ? spinTotalMultiplier : 1);
+          if (finalSpinNormalWin > 0) {
+              await animateTotalWinAddition(finalSpinNormalWin);
+              balance += finalSpinNormalWin;
+              updateBalanceUI();
+          }
+          DOM.globalMult.innerText = '0';
+          DOM.globalMult.style.color = '#ffffff';
+      }
+
+      if (scatterTriggeredThisSpin) setTimeout(() => triggerBonusModal(), 800);
+      return scatterTriggeredThisSpin; 
+    }
+
+    function applyGravityAndTrack() {
+      const shiftedCells = [];
+      for (let c = 0; c < COLS; c++) {
+        const startRow = unlockedCols[c] ? 0 : 1;
+        for (let r = ROWS - 1; r >= startRow; r--) {
+          if (gridData[r][c] === null) {
+            let upperRow = r - 1;
+            while (upperRow >= startRow && gridData[upperRow][c] === null) upperRow--;
+            if (upperRow >= startRow && gridData[upperRow][c] !== null) { gridData[r][c] = gridData[upperRow][c]; gridData[upperRow][c] = null; shiftedCells.push({ r: r, c: c, distance: r - upperRow }); }
+          }
+        }
+      }
+      return shiftedCells;
+    }
+
+    function fillEmptyTopCells() {
+      const newDropCells = [];
+      for (let c = 0; c < COLS; c++) {
+        const startRow = unlockedCols[c] ? 0 : 1; let indexInCol = 0;
+        for (let r = startRow; r < ROWS; r++) { if (gridData[r][c] === null) { gridData[r][c] = getRandomSymbol(); newDropCells.push({ r, c, indexInCol }); indexInCol++; } }
+      }
+      return newDropCells;
+    }
+
+    function triggerBonusModal() { if (bgmStarted && DOM.bgm) DOM.bgm.play().catch(e => {}); DOM.bonusModal.classList.add('active'); }
+    function closeModalAndStartFreeSpins() { unlockAudio(); DOM.bonusModal.classList.remove('active'); startAutoFreeSpinsLoop(); }
+
+    function showEndFSModal(totalWinAmt) {
+      return new Promise(resolve => {
+          DOM.endFsModal.classList.add('active'); let duration = 2500, startTimestamp = null;
+          const step = (timestamp) => {
+              if (!startTimestamp) startTimestamp = timestamp;
+              const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+              DOM.endFsAmount.innerText = `${Math.floor(progress * totalWinAmt).toLocaleString()} 🥩`;
+              if (progress < 1) window.requestAnimationFrame(step); else DOM.endFsAmount.innerText = `${totalWinAmt.toLocaleString()} 🥩`;
+          };
+          window.requestAnimationFrame(step);
+          window.closeEndFSModal = () => { DOM.endFsModal.classList.remove('active'); resolve(); };
+      });
+    }
+
+    async function startAutoFreeSpinsLoop() {
+      inFreeSpinsMode = true; 
+      globalMultiplier = 0; 
+      cumulativeTumbles = 0; 
+      unlockedCols = [false, false, false, false, false, false]; 
+      freeSpinTotalWin = 0; 
+      freeSpinsLeft = 10;
+
+      DOM.freeSpinBox.classList.add('active'); 
+      DOM.globalMult.innerText = 'x0'; 
+      DOM.globalMult.style.color = '#00ffcc'; 
+      DOM.freeSpinCount.innerText = freeSpinsLeft;
+      await new Promise(res => setTimeout(res, 1000));
+
+      while (freeSpinsLeft > 0) {
+        freeSpinsLeft--; 
+        DOM.freeSpinCount.innerText = freeSpinsLeft; 
+        await runSingleSpin(); 
+        await new Promise(res => setTimeout(res, 1000)); 
+      }
+
+      await showEndFSModal(freeSpinTotalWin);
+      inFreeSpinsMode = false; 
+      DOM.freeSpinBox.classList.remove('active');
+      
+      fetch(`${NGROK_URL}/sync_balance`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify({ username: currentUser, password: currentPassword }) }).catch(e=>{});
+      
+      await animateTotalWinAddition(freeSpinTotalWin);
+      
+      balance = targetServerBalance; 
+      maxWin = targetServerMaxWin; 
+      updateBalanceUI(); 
+      DOM.maxWin.innerText = maxWin.toLocaleString();
+      
+      globalMultiplier = 0; 
+      DOM.globalMult.innerText = '0'; 
+      DOM.globalMult.style.color = '#ffffff'; 
+      cumulativeTumbles = 0; 
+      unlockedCols = [false, false, false, false, false, false];
+      renderBoard('none'); 
+      isSpinning = false;
+    }
+  </script>
+</body>
+</html>
