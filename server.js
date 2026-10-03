@@ -9,7 +9,7 @@ app.use(express.static(__dirname));
 
 // 1. KẾT NỐI ĐẾN CLOUD DATABASE (MYSQL)
 const pool = mysql.createPool({
-    uri: process.env.DB_URI || 'mysql://2sH2hBKRZWCqXSP.root:pHbcjHbe91aD9EGf@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sys', // Nhớ giữ nguyên chuỗi URI của bạn
+    uri: process.env.DB_URI || 'mysql://2sH2hBKRZWCqXSP.root:pHbcjHbe91aD9EGf@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test', // Nhớ giữ nguyên chuỗi URI của bạn
     ssl: { 
         rejectUnauthorized: true 
     },
