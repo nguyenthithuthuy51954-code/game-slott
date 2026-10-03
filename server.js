@@ -1,66 +1,39 @@
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const mysql = require('mysql2');
 
 const app = express();
 app.use(cors()); 
 app.use(express.json()); 
-app.use(express.static(__dirname)); // Cho phép chạy file tĩnh khi up lên Render
+app.use(express.static('jungle'));
 
-const path = require('path');
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// 1. KẾT NỐI ĐẾN CLOUD DATABASE (MYSQL)
+const pool = mysql.createPool({
+    uri: process.env.DB_URI || 'mysql://2sH2hBKRZWCqXSP.root:pHbcjHbe91aD9EGf@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sys', // Dán chuỗi URI copy từ Aiven/TiDB vào đây
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-const db = new sqlite3.Database('./database.db', (err) => {
-    if (err) console.error("Lỗi mở database:", err.message);
-    else console.log("Đã kết nối SQLite Database.");
-});
-
-db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS players (
-        username TEXT PRIMARY KEY,
-        password TEXT,
-        balance INTEGER,
-        maxWin INTEGER,
-        shopData TEXT,
-        adTime INTEGER DEFAULT 0,
-        lionTime INTEGER DEFAULT 0,
-        dolphinTime INTEGER DEFAULT 0
-    )`);
-    
-    db.run(`ALTER TABLE players ADD COLUMN displayBalance INTEGER`, (err) => {
-        if (!err) {
-            db.run(`UPDATE players SET displayBalance = balance WHERE displayBalance IS NULL`);
-        }
-    });
+// 2. KHỞI TẠO BẢNG TỰ ĐỘNG
+pool.query(`CREATE TABLE IF NOT EXISTS players (
+    username VARCHAR(255) PRIMARY KEY,
+    password VARCHAR(255),
+    balance BIGINT,
+    displayBalance BIGINT,
+    maxWin BIGINT,
+    shopData TEXT,
+    adTime BIGINT DEFAULT 0,
+    lionTime BIGINT DEFAULT 0,
+    dolphinTime BIGINT DEFAULT 0
+)`, (err) => {
+    if (err) console.error("Lỗi tạo bảng MySQL:", err.message);
+    else console.log("Đã kết nối Cloud MySQL Database thành công.");
 });
 
 const parseShopData = (dataString) => {
     try { return dataString ? JSON.parse(dataString) : { unlocked: [], equipped: 'nut-quay.png' }; } 
     catch(e) { return { unlocked: [], equipped: 'nut-quay.png' }; }
-};
-
-const authenticate = (req, res, callback) => {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: "Thiếu thông tin đăng nhập" });
-    
-    db.get(`SELECT * FROM players WHERE username = ? AND password = ?`, [username, password], (err, player) => {
-        if (err) return res.status(500).json({ error: "Lỗi CSDL" });
-        if (!player) return res.status(401).json({ error: "Sai mật khẩu hoặc tài khoản không tồn tại" });
-        callback(player, username);
-    });
-};
-
-const updatePlayer = (username, updates, res, successData) => {
-    const keys = Object.keys(updates);
-    const values = Object.values(updates);
-    const setClause = keys.map(k => `${k} = ?`).join(', ');
-    
-    db.run(`UPDATE players SET ${setClause} WHERE username = ?`, [...values, username], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true, ...successData });
-    });
 };
 
 /* ======================================================
@@ -266,18 +239,20 @@ function simulateGame(seed, bet) {
 }
 
 /* ======================================================
-   API ENDPOINTS - BẢO MẬT ATOMIC QUERY CHỐNG HACK 100%
+   API ENDPOINTS - BẢO MẬT ATOMIC QUERY CHO MYSQL
    ====================================================== */
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: "Vui lòng nhập đủ tài khoản và mật khẩu." });
 
-    db.get(`SELECT * FROM players WHERE username = ?`, [username], (err, row) => {
+    pool.query(`SELECT * FROM players WHERE username = ?`, [username], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
+        const row = rows[0];
+        
         if (row) {
             if (row.password === password) {
-                db.run(`UPDATE players SET displayBalance = balance WHERE username = ?`, [username]);
+                pool.query(`UPDATE players SET displayBalance = balance WHERE username = ?`, [username]);
                 res.json({ 
                     balance: row.balance, maxWin: row.maxWin, shopData: parseShopData(row.shopData),
                     adTime: row.adTime, lionTime: row.lionTime, dolphinTime: row.dolphinTime
@@ -287,7 +262,7 @@ app.post('/login', (req, res) => {
             }
         } else {
             const defaultShopData = JSON.stringify({ unlocked: [], equipped: 'nut-quay.png' });
-            db.run(`INSERT INTO players (username, password, balance, displayBalance, maxWin, shopData, adTime, lionTime, dolphinTime) VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0)`, 
+            pool.query(`INSERT INTO players (username, password, balance, displayBalance, maxWin, shopData, adTime, lionTime, dolphinTime) VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0)`, 
                 [username, password, 1000, 1000, 0, defaultShopData], (err) => {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ balance: 1000, maxWin: 0, shopData: { unlocked: [], equipped: 'nut-quay.png' }, adTime: 0, lionTime: 0, dolphinTime: 0 });
@@ -302,22 +277,23 @@ app.post('/spin', (req, res) => {
     const ALLOWED_BETS = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
     if (!ALLOWED_BETS.includes(bet)) return res.status(400).json({error: "Mức cược không hợp lệ!"});
 
-    db.run(`UPDATE players SET balance = balance - ?, displayBalance = displayBalance - ? WHERE username = ? AND password = ? AND balance >= ?`, 
-    [bet, bet, username, password, bet], function(err) {
+    pool.query(`UPDATE players SET balance = balance - ?, displayBalance = displayBalance - ? WHERE username = ? AND password = ? AND balance >= ?`, 
+    [bet, bet, username, password, bet], (err, result) => {
         if (err) return res.status(500).json({ error: "Lỗi hệ thống!" });
-        if (this.changes === 0) return res.status(400).json({ error: "Không đủ Thịt hoặc sai mật khẩu!" });
+        if (result.affectedRows === 0) return res.status(400).json({ error: "Không đủ Thịt hoặc sai mật khẩu!" });
 
         const seed = Math.floor(Math.random() * 2147483647);
-        const result = simulateGame(seed, bet);
-        const winAmount = result.totalWin;
+        const simResult = simulateGame(seed, bet);
+        const winAmount = simResult.totalWin;
 
-        db.run(`UPDATE players SET balance = balance + ?, maxWin = CASE WHEN ? > maxWin THEN ? ELSE maxWin END WHERE username = ?`, 
-        [winAmount, winAmount, winAmount, username], function() {
-            if (!result.triggeredFS && winAmount > 0) {
-                db.run(`UPDATE players SET displayBalance = displayBalance + ? WHERE username = ?`, [winAmount, username]);
+        pool.query(`UPDATE players SET balance = balance + ?, maxWin = CASE WHEN ? > maxWin THEN ? ELSE maxWin END WHERE username = ?`, 
+        [winAmount, winAmount, winAmount, username], () => {
+            if (!simResult.triggeredFS && winAmount > 0) {
+                pool.query(`UPDATE players SET displayBalance = displayBalance + ? WHERE username = ?`, [winAmount, username]);
             }
-            db.get(`SELECT balance, maxWin FROM players WHERE username = ?`, [username], (err, row) => {
-                res.json({ success: true, seed: seed, balance: row.balance, maxWin: row.maxWin, totalWin: winAmount, triggeredFS: result.triggeredFS });
+            pool.query(`SELECT balance, maxWin FROM players WHERE username = ?`, [username], (err, rows) => {
+                const row = rows[0];
+                res.json({ success: true, seed: seed, balance: row.balance, maxWin: row.maxWin, totalWin: winAmount, triggeredFS: simResult.triggeredFS });
             });
         });
     });
@@ -325,7 +301,7 @@ app.post('/spin', (req, res) => {
 
 app.post('/sync_balance', (req, res) => {
     const { username, password } = req.body;
-    db.run(`UPDATE players SET displayBalance = balance WHERE username = ? AND password = ?`, [username, password], function() {
+    pool.query(`UPDATE players SET displayBalance = balance WHERE username = ? AND password = ?`, [username, password], () => {
         res.json({ success: true });
     });
 });
@@ -333,24 +309,25 @@ app.post('/sync_balance', (req, res) => {
 app.post('/shop_buy', (req, res) => {
     const { username, password, item_id } = req.body;
     
-    const SHOP_PRICES = { 'skin1': 10000, 'skin2': 50000, 'skin3': 500000, 'skin4': 1000000, 'skin5': 10000000, 'skin6': 100000000 };
+    const SHOP_PRICES = { 'skin1': 10000, 'skin2': 50000, 'skin3': 500000, 'skin4': 1000000, 'skin5': 10000000, 'skin6': 100000000, 'skin7': 0 };
     const actualPrice = SHOP_PRICES[item_id];
     
     if (actualPrice === undefined) return res.status(400).json({error: "Vật phẩm không hợp lệ!"});
 
-    db.get(`SELECT shopData FROM players WHERE username = ? AND password = ?`, [username, password], (err, player) => {
+    pool.query(`SELECT shopData FROM players WHERE username = ? AND password = ?`, [username, password], (err, rows) => {
+        const player = rows[0];
         if (!player) return res.status(401).json({error: "Lỗi xác thực"});
         let shopData = parseShopData(player.shopData);
         if (shopData.unlocked.includes(item_id)) return res.status(400).json({error: "Đã sở hữu vật phẩm này!"});
 
-        db.run(`UPDATE players SET balance = balance - ?, displayBalance = displayBalance - ? WHERE username = ? AND balance >= ?`, 
-        [actualPrice, actualPrice, username, actualPrice], function(err) {
-            if (err || this.changes === 0) return res.status(400).json({error: "Tài khoản không đủ Thịt!"});
+        pool.query(`UPDATE players SET balance = balance - ?, displayBalance = displayBalance - ? WHERE username = ? AND balance >= ?`, 
+        [actualPrice, actualPrice, username, actualPrice], (err, result) => {
+            if (err || result.affectedRows === 0) return res.status(400).json({error: "Tài khoản không đủ Thịt!"});
             
             shopData.unlocked.push(item_id);
-            db.run(`UPDATE players SET shopData = ? WHERE username = ?`, [JSON.stringify(shopData), username], function() {
-                db.get(`SELECT balance FROM players WHERE username = ?`, [username], (err, row) => {
-                    res.json({ success: true, balance: row.balance, shopData: shopData });
+            pool.query(`UPDATE players SET shopData = ? WHERE username = ?`, [JSON.stringify(shopData), username], () => {
+                pool.query(`SELECT balance FROM players WHERE username = ?`, [username], (err, rows) => {
+                    res.json({ success: true, balance: rows[0].balance, shopData: shopData });
                 });
             });
         });
@@ -364,13 +341,14 @@ app.post('/shop_unlock_special', (req, res) => {
         return res.status(400).json({error: "Mã bí mật không chính xác!"});
     }
 
-    db.get(`SELECT shopData FROM players WHERE username = ? AND password = ?`, [username, password], (err, player) => {
+    pool.query(`SELECT shopData FROM players WHERE username = ? AND password = ?`, [username, password], (err, rows) => {
+        const player = rows[0];
         if (!player) return res.status(401).json({error: "Lỗi xác thực"});
         let shopData = parseShopData(player.shopData);
         if (shopData.unlocked.includes(item_id)) return res.status(400).json({error: "Đã sở hữu vật phẩm này!"});
 
         shopData.unlocked.push(item_id);
-        db.run(`UPDATE players SET shopData = ? WHERE username = ?`, [JSON.stringify(shopData), username], function() {
+        pool.query(`UPDATE players SET shopData = ? WHERE username = ?`, [JSON.stringify(shopData), username], () => {
             res.json({ success: true, shopData: shopData });
         });
     });
@@ -378,19 +356,21 @@ app.post('/shop_unlock_special', (req, res) => {
 
 app.post('/shop_equip', (req, res) => {
     const { username, password, equip_src } = req.body;
-    db.get(`SELECT shopData FROM players WHERE username = ? AND password = ?`, [username, password], (err, player) => {
+    pool.query(`SELECT shopData FROM players WHERE username = ? AND password = ?`, [username, password], (err, rows) => {
+        const player = rows[0];
         if (!player) return res.status(401).json({error: "Lỗi xác thực"});
         let shopData = parseShopData(player.shopData);
         shopData.equipped = equip_src;
-        db.run(`UPDATE players SET shopData = ? WHERE username = ?`, [JSON.stringify(shopData), username], function() {
+        pool.query(`UPDATE players SET shopData = ? WHERE username = ?`, [JSON.stringify(shopData), username], () => {
             res.json({ success: true, shopData: shopData });
         });
     });
 });
 
 app.get('/top-player', (req, res) => {
-    db.get(`SELECT username, displayBalance FROM players ORDER BY displayBalance DESC LIMIT 1`, [], (err, row) => {
+    pool.query(`SELECT username, displayBalance FROM players ORDER BY displayBalance DESC LIMIT 1`, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
+        const row = rows[0];
         if (row) res.json({ username: row.username, balance: row.displayBalance });
         else res.json({ username: "Chưa có", balance: 0 });
     });
@@ -401,11 +381,11 @@ app.post('/add_meat', (req, res) => {
     const amount = parseInt(req.body.amount) || 0;
     if (amount <= 0 || amount > 10000000) return res.status(400).json({error: "Số lượng không hợp lệ!"});
     
-    db.run(`UPDATE players SET balance = balance + ?, displayBalance = displayBalance + ? WHERE username = ? AND password = ?`, 
-    [amount, amount, username, password], function(err) {
-        if (this.changes === 0) return res.status(400).json({error: "Xác thực thất bại!"});
-        db.get(`SELECT balance FROM players WHERE username = ?`, [username], (err, row) => {
-            res.json({ success: true, balance: row.balance });
+    pool.query(`UPDATE players SET balance = balance + ?, displayBalance = displayBalance + ? WHERE username = ? AND password = ?`, 
+    [amount, amount, username, password], (err, result) => {
+        if (result.affectedRows === 0) return res.status(400).json({error: "Xác thực thất bại!"});
+        pool.query(`SELECT balance FROM players WHERE username = ?`, [username], (err, rows) => {
+            res.json({ success: true, balance: rows[0].balance });
         });
     });
 });
@@ -415,11 +395,11 @@ app.post('/watch_ad', (req, res) => {
     const now = Date.now();
     const cooldown = 60 * 60 * 1000; 
 
-    db.run(`UPDATE players SET balance = balance + 200, displayBalance = displayBalance + 200, adTime = ? WHERE username = ? AND password = ? AND (? - adTime >= ?)`, 
-    [now, username, password, now, cooldown], function(err) {
-        if (err || this.changes === 0) return res.status(400).json({error: "Chưa hết thời gian chờ hoặc lỗi xác thực!"});
-        db.get(`SELECT balance FROM players WHERE username = ?`, [username], (err, row) => {
-            res.json({ success: true, balance: row.balance, adTime: now });
+    pool.query(`UPDATE players SET balance = balance + 200, displayBalance = displayBalance + 200, adTime = ? WHERE username = ? AND password = ? AND (? - adTime >= ?)`, 
+    [now, username, password, now, cooldown], (err, result) => {
+        if (err || result.affectedRows === 0) return res.status(400).json({error: "Chưa hết thời gian chờ hoặc lỗi xác thực!"});
+        pool.query(`SELECT balance FROM players WHERE username = ?`, [username], (err, rows) => {
+            res.json({ success: true, balance: rows[0].balance, adTime: now });
         });
     });
 });
@@ -432,10 +412,10 @@ app.post('/unlock_animal', (req, res) => {
     else if (animalId !== 'lion') return res.status(400).json({error: "Pet không hợp lệ!"});
 
     if (cost > 0) {
-        db.run(`UPDATE players SET balance = balance - ?, displayBalance = displayBalance - ? WHERE username = ? AND password = ? AND balance >= ?`, 
-        [cost, cost, username, password, cost], function(err) {
-            if (this.changes === 0) return res.status(400).json({error: "Không đủ Thịt hoặc lỗi!"});
-            db.get(`SELECT balance FROM players WHERE username = ?`, [username], (err, row) => res.json({ success: true, balance: row.balance }));
+        pool.query(`UPDATE players SET balance = balance - ?, displayBalance = displayBalance - ? WHERE username = ? AND password = ? AND balance >= ?`, 
+        [cost, cost, username, password, cost], (err, result) => {
+            if (result.affectedRows === 0) return res.status(400).json({error: "Không đủ Thịt hoặc lỗi!"});
+            pool.query(`SELECT balance FROM players WHERE username = ?`, [username], (err, rows) => res.json({ success: true, balance: rows[0].balance }));
         });
     } else {
         res.json({ success: true });
@@ -453,11 +433,11 @@ app.post('/finish_quiz', (req, res) => {
     const now = Date.now();
     const cooldown = 3 * 60 * 60 * 1000;
 
-    db.run(`UPDATE players SET balance = balance + ?, displayBalance = displayBalance + ?, lionTime = ? WHERE username = ? AND password = ? AND (? - lionTime >= ?)`, 
-    [meatEarned, meatEarned, now, username, password, now, cooldown], function(err) {
-        if (this.changes === 0) return res.status(400).json({error: "Sư tử đang nghỉ ngơi, không thể nhận thưởng!"});
-        db.get(`SELECT balance FROM players WHERE username = ?`, [username], (err, row) => {
-            res.json({ success: true, balance: row.balance, meatEarned: meatEarned, lionTime: now });
+    pool.query(`UPDATE players SET balance = balance + ?, displayBalance = displayBalance + ?, lionTime = ? WHERE username = ? AND password = ? AND (? - lionTime >= ?)`, 
+    [meatEarned, meatEarned, now, username, password, now, cooldown], (err, result) => {
+        if (result.affectedRows === 0) return res.status(400).json({error: "Sư tử đang nghỉ ngơi, không thể nhận thưởng!"});
+        pool.query(`SELECT balance FROM players WHERE username = ?`, [username], (err, rows) => {
+            res.json({ success: true, balance: rows[0].balance, meatEarned: meatEarned, lionTime: now });
         });
     });
 });
@@ -471,16 +451,18 @@ app.post('/finish_dolphin', (req, res) => {
     const now = Date.now();
     const cooldown = 3 * 60 * 60 * 1000;
     
-    db.run(`UPDATE players SET balance = balance + ?, displayBalance = displayBalance + ?, dolphinTime = ? WHERE username = ? AND password = ? AND (? - dolphinTime >= ?)`, 
-    [meatEarned, meatEarned, now, username, password, now, cooldown], function(err) {
-        if (this.changes === 0) return res.status(400).json({error: "Cá heo đang bơi đi xa, không thể nhận thưởng!"});
-        db.get(`SELECT balance FROM players WHERE username = ?`, [username], (err, row) => {
-            res.json({ success: true, balance: row.balance, meatEarned: meatEarned, dolphinTime: now });
+    pool.query(`UPDATE players SET balance = balance + ?, displayBalance = displayBalance + ?, dolphinTime = ? WHERE username = ? AND password = ? AND (? - dolphinTime >= ?)`, 
+    [meatEarned, meatEarned, now, username, password, now, cooldown], (err, result) => {
+        if (result.affectedRows === 0) return res.status(400).json({error: "Cá heo đang bơi đi xa, không thể nhận thưởng!"});
+        pool.query(`SELECT balance FROM players WHERE username = ?`, [username], (err, rows) => {
+            res.json({ success: true, balance: rows[0].balance, meatEarned: meatEarned, dolphinTime: now });
         });
     });
 });
 
-const PORT = process.env.PORT || 8080;
+// Chạy server cổng 8080
+const PORT = 8080;
 app.listen(PORT, () => {
-    console.log(`[BẢO MẬT 100% ATOMIC] Máy chủ Game đang chạy tại: http://localhost:${PORT}`);
+    console.log(`[BẢO MẬT MYSQL ĐÁM MÂY] Máy chủ Game đang chạy tại: http://localhost:${PORT}`);
+    console.log(`=> Dữ liệu người chơi giờ đây đã an toàn vĩnh viễn!`);
 });
