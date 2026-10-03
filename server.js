@@ -319,7 +319,12 @@ app.post('/sync_balance', (req, res) => {
 app.post('/shop_buy', (req, res) => {
     const { username, password, item_id } = req.body;
     
-    const SHOP_PRICES = { 'skin1': 10000, 'skin2': 50000, 'skin3': 500000, 'skin4': 1000000, 'skin5': 10000000, 'skin6': 100000000, 'skin7': 0 };
+    // Cập nhật giá bán của Item mới (skin8: 1 tỷ)
+    const SHOP_PRICES = { 
+        'skin1': 10000, 'skin2': 50000, 'skin3': 500000, 
+        'skin4': 1000000, 'skin5': 10000000, 'skin6': 100000000, 
+        'skin7': 0, 'skin8': 1000000000 
+    };
     const actualPrice = SHOP_PRICES[item_id];
     
     if (actualPrice === undefined) return res.status(400).json({error: "Vật phẩm không hợp lệ!"});
