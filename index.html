@@ -87,6 +87,8 @@
     .scatter-video-element { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; object-fit: cover; border-radius: 6px; mix-blend-mode: screen; pointer-events: none; }
     .scatter-glow-border { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 6px; box-shadow: inset 0 0 15px 3px rgba(255, 165, 0, 0.8), 0 0 10px 1px rgba(255, 200, 0, 0.5); z-index: 5; pointer-events: none; }
     .scatter-glow-border-ai { box-shadow: inset 0 0 15px 3px rgba(0, 150, 255, 0.8), 0 0 10px 1px rgba(0, 200, 255, 0.5) !important; }
+    .scatter-glow-border-ph { box-shadow: inset 0 0 15px 3px rgba(255, 50, 0, 0.8), 0 0 10px 1px rgba(255, 100, 0, 0.5) !important; }
+    .scatter-glow-border-kylan { box-shadow: inset 0 0 15px 3px rgba(0, 150, 255, 0.8), 0 0 10px 1px rgba(255, 255, 255, 0.8) !important; }
 
     /* --- HIỆU ỨNG VÒNG SÁNG QUAY TRÒN & PHÌNH TO --- */
     .exploding-prep { animation: symbolSwell 1.1s cubic-bezier(0.25, 1, 0.5, 1) forwards !important; z-index: 35 !important; }
@@ -202,8 +204,10 @@
     .glow-sieupham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px #000, 0 0 30px #fff, 0 0 50px #0d47a1 !important; filter: brightness(1.3); }
     .glow-cucpham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 25px #00e5ff, 0 0 50px #d500f9 !important; filter: brightness(1.35); }
     .glow-thuongpham { box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 25px #ff4500, 0 0 50px #ff0000 !important; filter: brightness(1.4); }
-    /* HIỆU ỨNG TÍM CỦA ĐẾ PHẨM */
-    .glow-depham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 30px #aa00ff, 0 0 60px #d500f9 !important; filter: brightness(1.5); }
+    /* HIỆU ỨNG GLOW CỦA CÁC ĐẾ PHẨM */
+    .glow-depham-ai { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 30px #aa00ff, 0 0 60px #d500f9 !important; filter: brightness(1.5); }
+    .glow-depham-ph { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 30px #ff0000, 0 0 60px #ff5722 !important; filter: brightness(1.5); }
+    .glow-depham-kylan { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 30px #0044ff, 0 0 60px #00bfff !important; filter: brightness(1.5); }
     
     /* --- TỐI ƯU HÓA HOÀN TOÀN TÍNH NĂNG XÓA NỀN ĐEN VIDEO (MIX-BLEND-MODE) --- */
     
@@ -284,17 +288,16 @@
     .shop-btn-equipped { background: #555; color: #aaa; border: 2px solid #888; padding: 0; border-radius: 6px; font-weight: 900; cursor: default; width: 85px; height: 35px; }
 
     /* CSS ĐẶC BIỆT CHO KHUNG COMBO ĐẾ PHẨM */
-    .shop-item.combo-ai-style { 
-      background: url('combo-ai/bg-item-ai.jpg') no-repeat center center; 
+    .shop-item.combo-item-style { 
       background-size: 100% 100%; 
       min-height: 130px; 
-      padding: 15px 15px 15px 36%; /* Đẩy nội dung sang phải để không đè lên Rồng[cite: 11] */
+      padding: 15px 15px 15px 38%; /* Đẩy nội dung sang phải để không đè lên hình ảnh bên trái khung */
       display: flex; 
       flex-direction: column; 
       align-items: flex-start; 
       justify-content: center; 
     }
-    .shop-item.combo-ai-style .shop-item-info { 
+    .combo-item-style .shop-item-info { 
       text-align: left; 
       padding: 0; 
       display: flex; 
@@ -302,22 +305,21 @@
       align-items: flex-start; 
       width: 100%; 
     }
-    .shop-item.combo-ai-style .shop-item-name { 
+    .combo-item-style .shop-item-name { 
       font-size: 1.15rem; 
       text-transform: uppercase; 
       color: #ffffff; /* Màu chữ trắng */
       -webkit-text-stroke: 1px #000000; /* Viền đen */
-      text-shadow: 0 0 8px #00bfff, 0 0 15px #00ffff; /* Ánh xanh biển */
       margin-bottom: 4px; 
     }
-    .shop-item.combo-ai-style .shop-item-rarity { 
+    .combo-item-style .shop-item-rarity { 
       color: #ffffff; /* Đổi màu phân loại thành trắng cho nổi bật */
       font-weight: bold; 
       font-size: 0.9rem; 
       margin-bottom: 6px; 
       text-shadow: 1px 1px 3px #000; 
     }
-    .shop-item.combo-ai-style .shop-item-action { 
+    .combo-item-style .shop-item-action { 
       position: relative; 
       bottom: auto; 
       right: auto; 
@@ -326,6 +328,15 @@
       margin-top: 5px; 
       width: 100%; 
     }
+    
+    /* Giao diện riêng cho từng Combo */
+    .combo-ai-bg { background: url('combo-ai/bg-item-ai.jpg') no-repeat center center; }
+    .combo-ph-bg { background: url('combo-ph/bg-item-ph.jpg') no-repeat center center; padding-left: 40% !important; }
+    .combo-kylan-bg { background: url('combo-kylan/bg-item-kylan.jpg') no-repeat center center; padding-left: 40% !important; }
+    
+    .combo-name-ai { text-shadow: 0 0 8px #00bfff, 0 0 15px #00ffff; } /* Ánh xanh biển AI */
+    .combo-name-ph { text-shadow: 0 0 8px #ff9800, 0 0 15px #ff5722; } /* Ánh cam PH */
+    .combo-name-kylan { text-shadow: 0 0 8px #0088ff, 0 0 15px #00ffff; } /* Ánh xanh biển đậm Kỳ Lân */
 
     #qr-modal .nap-bg-container { cursor: pointer; }
     .hitbox-nap { position: absolute; background: transparent; cursor: pointer; z-index: 20; -webkit-tap-highlight-color: transparent; }
@@ -624,18 +635,20 @@
     let targetServerBalance = 0, targetServerMaxWin = 0;
 
     let currentShopCategory = 'Hạ phẩm';
-    let isComboActive = false; // Cờ kiểm tra trạng thái kích hoạt combo
+    let currentTheme = 'default'; // Biến cờ theme: 'default', 'ai', 'ph', 'kylan'
 
-    // DANH SÁCH SKIN (Đã thêm combo Đế Phẩm)
+    // DANH SÁCH SKIN (Đã thêm combo Đế Phẩm Kỳ Lân)
     const SHOP_ITEMS = [
       { id: 'skin1', src: 'nut1.png', name: 'Kỳ Đại Ngàn', rarity: 'Hạ phẩm', price: 10000 },
       { id: 'skin2', src: 'nut2.png', name: 'Linh Đầm Cổ', rarity: 'Hạ phẩm', price: 50000 },
-      { id: 'skin7', src: 'spin7.mp4', name: 'Nạp lần đầu', rarity: 'Siêu phẩm', price: 'Vô giá', isPasswordLocked: true, isHiddenImg: true },
+      { id: 'skin7', src: 'spin7.mp4', name: 'Nạp lần đầu', rarity: 'Linh phẩm', price: 'Vô giá', isPasswordLocked: true, isHiddenImg: true },
       { id: 'skin3', src: 'nut3.png', name: 'Hoàng Kim Sinh Mệnh', rarity: 'Linh phẩm', price: 500000 },
       { id: 'skin4', src: 'nut4.png', name: 'Băng Phong Ma Trận', rarity: 'Siêu phẩm', price: 1000000 },
       { id: 'skin5', src: 'nut5.png', name: 'Dạ Quang Huyền Ảo', rarity: 'Cực phẩm', price: 10000000 },
       { id: 'skin6', src: 'spin6.mp4', name: 'Linh Bảo Rồng Thiên', rarity: 'Thượng phẩm', price: 100000000, isHiddenImg: true },
-      { id: 'skin8', src: 'combo-ai/nut7.png', name: 'Ảo Ảnh Thần Khí', rarity: 'Đế phẩm', price: 1000000000, isCombo: true }
+      { id: 'skin8', src: 'combo-ai/nut7.png', name: 'Ảo Ảnh Thần Khí', rarity: 'Đế phẩm', price: 1000000000, isCombo: true, comboType: 'ai' },
+      { id: 'skin9', src: 'combo-ph/nut8.png', name: 'Thần Thú Phượng Hoàng', rarity: 'Đế phẩm', price: 2500000000, isCombo: true, comboType: 'ph' },
+      { id: 'skin10', src: 'combo-kylan/nut9.png', name: 'Thần Thú Kỳ Lân', rarity: 'Đế phẩm', price: 2500000000, isCombo: true, comboType: 'kylan' }
     ];
     let playerShopData = { unlocked: [], equipped: 'nut-quay.png' };
 
@@ -668,55 +681,71 @@
     }
 
     // HÀM CHUYỂN ĐỔI THEME KHI KÍCH HOẠT COMBO
-    function applyTheme(isAiTheme) {
-        isComboActive = isAiTheme;
+    function applyTheme(themeName) {
+        currentTheme = themeName;
         const charVideo = document.querySelector('.character-video');
         
-        if (isAiTheme) {
+        if (themeName === 'ai') {
             document.body.style.backgroundImage = "url('combo-ai/bg-game-ai.png')";
             DOM.frame.style.backgroundImage = "url('combo-ai/khung_2-ai.png')";
             document.querySelector('.bottom-console').style.backgroundImage = "url('combo-ai/console-bg-ai.png')";
             if (!charVideo.querySelector('source').src.includes('congnghe-ai.mp4')) {
-                charVideo.style.opacity = '0';
-                setTimeout(() => {
-                    charVideo.querySelector('source').src = 'combo-ai/congnghe-ai.mp4';
-                    charVideo.load();
-                    charVideo.play().catch(e=>{});
-                    charVideo.style.opacity = '1';
-                }, 300);
+                changeVideoSource(charVideo, 'combo-ai/congnghe-ai.mp4');
+            }
+        } else if (themeName === 'ph') {
+            document.body.style.backgroundImage = "url('combo-ph/bg-game-ph.png')";
+            DOM.frame.style.backgroundImage = "url('combo-ph/khung_2-ph.png')";
+            document.querySelector('.bottom-console').style.backgroundImage = "url('combo-ph/console-bg-ph.png')";
+            if (!charVideo.querySelector('source').src.includes('linhvat-ph.mp4')) {
+                changeVideoSource(charVideo, 'combo-ph/linhvat-ph.mp4');
+            }
+        } else if (themeName === 'kylan') {
+            document.body.style.backgroundImage = "url('combo-kylan/bg-game-kylan.png')";
+            DOM.frame.style.backgroundImage = "url('combo-kylan/khung_2-kylan.png')";
+            document.querySelector('.bottom-console').style.backgroundImage = "url('combo-kylan/console-bg-kylan.png')";
+            if (!charVideo.querySelector('source').src.includes('linhvat-kylan.mp4')) {
+                changeVideoSource(charVideo, 'combo-kylan/linhvat-kylan.mp4');
             }
         } else {
             document.body.style.backgroundImage = "url('bg-game.png'), url('hinhnen.jpg')";
             DOM.frame.style.backgroundImage = "url('khung_2.png')";
             document.querySelector('.bottom-console').style.backgroundImage = "url('console-bg.png')";
             if (!charVideo.querySelector('source').src.includes('sutu-den.mp4')) {
-                charVideo.style.opacity = '0';
-                setTimeout(() => {
-                    charVideo.querySelector('source').src = 'sutu-den.mp4';
-                    charVideo.load();
-                    charVideo.play().catch(e=>{});
-                    charVideo.style.opacity = '1';
-                }, 300);
+                changeVideoSource(charVideo, 'sutu-den.mp4');
             }
         }
         // Gọi lại render để cập nhật ngay lập tức giao diện khóa nếu cần
         renderBoard('none');
+    }
+    
+    function changeVideoSource(videoElement, newSrc) {
+        videoElement.style.opacity = '0';
+        setTimeout(() => {
+            videoElement.querySelector('source').src = newSrc;
+            videoElement.load();
+            videoElement.play().catch(e=>{});
+            videoElement.style.opacity = '1';
+        }, 300);
     }
 
     // ÁP DỤNG SKIN: THÍCH ỨNG CHUẨN MỌI MP4 & LẤY VIỀN SÁNG (GLOW) TỰ ĐỘNG
     function applySpinButtonSkin(src) {
         DOM.spinBtn.style.backgroundImage = 'none';
         DOM.spinBtn.innerHTML = ''; 
-        DOM.spinBtn.classList.remove('glow-hapham', 'glow-linhpham', 'glow-sieupham', 'glow-cucpham', 'glow-thuongpham', 'glow-depham', 'spin-btn-screen-fix');
+        DOM.spinBtn.classList.remove('glow-hapham', 'glow-linhpham', 'glow-sieupham', 'glow-cucpham', 'glow-thuongpham', 'glow-depham-ai', 'glow-depham-ph', 'glow-depham-kylan', 'spin-btn-screen-fix');
         
         const spinHitbox = DOM.spinBtn.parentElement;
         spinHitbox.classList.remove('video-skin-active');
 
         // Kích hoạt theme Combo nếu đúng file nút spin combo
         if (src === 'combo-ai/nut7.png' || src === 'nut7.png') {
-            applyTheme(true);
+            applyTheme('ai');
+        } else if (src === 'combo-ph/nut8.png' || src === 'nut8.png') {
+            applyTheme('ph');
+        } else if (src === 'combo-kylan/nut9.png' || src === 'nut9.png') {
+            applyTheme('kylan');
         } else {
-            applyTheme(false);
+            applyTheme('default');
         }
 
         if (src && src.endsWith('.mp4')) {
@@ -750,7 +779,9 @@
             else if (item.rarity === 'Siêu phẩm') DOM.spinBtn.classList.add('glow-sieupham');
             else if (item.rarity === 'Cực phẩm') DOM.spinBtn.classList.add('glow-cucpham');
             else if (item.rarity === 'Thượng phẩm') DOM.spinBtn.classList.add('glow-thuongpham');
-            else if (item.rarity === 'Đế phẩm') DOM.spinBtn.classList.add('glow-depham');
+            else if (item.rarity === 'Đế phẩm' && item.comboType === 'ai') DOM.spinBtn.classList.add('glow-depham-ai');
+            else if (item.rarity === 'Đế phẩm' && item.comboType === 'ph') DOM.spinBtn.classList.add('glow-depham-ph');
+            else if (item.rarity === 'Đế phẩm' && item.comboType === 'kylan') DOM.spinBtn.classList.add('glow-depham-kylan');
         }
     }
 
@@ -890,12 +921,15 @@
         
         let displayPrice = item.price === 'Vô giá' ? 'Vô giá' : item.price.toLocaleString() + ' 🥩';
 
-        // Tạo thẻ thông tin tùy biến cho phần "Bỏ chữ (Combo Toàn Diện)" 
+        // Xử lý hiển thị riêng cho các khung Combo Đế Phẩm
         if (item.isCombo) {
+            const bgClass = item.comboType === 'ai' ? 'combo-ai-bg' : (item.comboType === 'ph' ? 'combo-ph-bg' : 'combo-kylan-bg');
+            const nameClass = item.comboType === 'ai' ? 'combo-name-ai' : (item.comboType === 'ph' ? 'combo-name-ph' : 'combo-name-kylan');
+            
             DOM.shopItems.innerHTML += `
-              <div class="shop-item combo-ai-style">
+              <div class="shop-item combo-item-style ${bgClass}">
                 <div class="shop-item-info">
-                  <div class="shop-item-name">${item.name}</div>
+                  <div class="shop-item-name ${nameClass}">${item.name}</div>
                   <div class="shop-item-rarity">Phân loại: ${item.rarity}</div>
                   <div class="shop-item-price">${isUnlocked ? 'Đã sở hữu' : displayPrice}</div>
                   <div class="shop-item-action">${actionBtn}</div>
@@ -958,7 +992,7 @@
         try {
           const canvas = document.createElement('canvas'); canvas.width = hiddenVid.videoWidth || 200; canvas.height = hiddenVid.videoHeight || 200;
           canvas.getContext('2d').drawImage(hiddenVid, 0, 0, canvas.width, canvas.height); scatterPosterDataUrl = canvas.toDataURL('image/jpeg');
-          document.querySelectorAll('.scatter-video-element').forEach(v => { if (!v.poster && !isComboActive) v.poster = scatterPosterDataUrl; });
+          document.querySelectorAll('.scatter-video-element').forEach(v => { if (!v.poster && currentTheme === 'default') v.poster = scatterPosterDataUrl; });
         } catch(e) {}
       });
     };
@@ -1085,8 +1119,12 @@
 
           if (r === 0 && !unlockedCols[c]) {
             cell.classList.add('locked-cell');
-            // Cập nhật đường dẫn ảnh khóa nếu đang dùng Combo AI
-            const lockImgUrl = isComboActive ? `combo-ai/symbol-khoa-ai-${UNLOCK_THRESHOLDS[c]}.png` : `symbol-khoa${UNLOCK_THRESHOLDS[c]}.png`;
+            // Cập nhật đường dẫn ảnh khóa theo Theme
+            let lockImgUrl = `symbol-khoa${UNLOCK_THRESHOLDS[c]}.png`;
+            if (currentTheme === 'ai') lockImgUrl = `combo-ai/symbol-khoa-ai-${UNLOCK_THRESHOLDS[c]}.png`;
+            else if (currentTheme === 'ph') lockImgUrl = `combo-ph/symbol-khoa-ph-${UNLOCK_THRESHOLDS[c]}.png`;
+            else if (currentTheme === 'kylan') lockImgUrl = `combo-kylan/symbol-khoa-kylan-${UNLOCK_THRESHOLDS[c]}.png`;
+            
             cell.style.setProperty('background-image', `url('${lockImgUrl}')`, 'important');
           } else if (sym !== null) {
             if (sym === SCATTER_SYM) {
@@ -1097,14 +1135,23 @@
               let vid = oldVids[`${oldR}_${c}`];
               if (!vid || animType === 'continuous_spin' || animType === 'spin_enter') {
                   vid = document.createElement('video'); vid.className = 'scatter-video-element'; vid.muted = true; vid.playsInline = true;
-                  if (scatterPosterDataUrl && !isComboActive) vid.poster = scatterPosterDataUrl;
-                  vid.src = isComboActive ? 'combo-ai/symbolscatter-ai.mp4' : 'symbolscatter.mp4'; 
+                  if (scatterPosterDataUrl && currentTheme === 'default') vid.poster = scatterPosterDataUrl;
+                  
+                  if (currentTheme === 'ai') vid.src = 'combo-ai/symbolscatter-ai.mp4';
+                  else if (currentTheme === 'ph') vid.src = 'combo-ph/symbolscatter-ph.mp4';
+                  else if (currentTheme === 'kylan') vid.src = 'combo-kylan/symbolscatter-kylan.mp4';
+                  else vid.src = 'symbolscatter.mp4'; 
+                  
                   vid.load();
                   let p = vid.play(); if (p !== undefined) p.then(() => { vid.pause(); vid.currentTime = 0.001; }).catch(e => vid.currentTime = 0.001);
               }
               cell.appendChild(vid);
+              
               const glow = document.createElement('div'); glow.className = 'scatter-glow-border'; 
-              if (isComboActive) glow.classList.add('scatter-glow-border-ai');
+              if (currentTheme === 'ai') glow.classList.add('scatter-glow-border-ai');
+              else if (currentTheme === 'ph') glow.classList.add('scatter-glow-border-ph');
+              else if (currentTheme === 'kylan') glow.classList.add('scatter-glow-border-kylan');
+              
               cell.appendChild(glow);
             } 
             else if (typeof sym === 'string' && sym.startsWith('x')) {
@@ -1197,8 +1244,8 @@
               spinVid.play().catch(e => {});
           }
 
-          // Điều kiện mới: Bỏ khói đỏ nếu người chơi đang sử dụng spin6.mp4 hoặc spin7.mp4
-          if (playerShopData.equipped !== 'spin6.mp4' && playerShopData.equipped !== 'spin7.mp4') {
+          // Điều kiện chặn khói đỏ nếu người chơi đang sử dụng spin6.mp4 hoặc spin7.mp4
+          if (!playerShopData.equipped.includes('spin6.mp4') && !playerShopData.equipped.includes('spin7.mp4')) {
               spawnRedSmokeEffect(DOM.spinBtn.parentElement);
           }
       }
@@ -1239,7 +1286,7 @@
 
       const cloneVids = clonedGrid.querySelectorAll('.scatter-video-element'), origVids = DOM.grid.querySelectorAll('.scatter-video-element');
       for(let i=0; i<origVids.length; i++){
-          if(cloneVids[i] && origVids[i]) { cloneVids[i].currentTime = origVids[i].currentTime > 0 ? origVids[i].currentTime : 0.001; if (scatterPosterDataUrl && !isComboActive) cloneVids[i].poster = scatterPosterDataUrl; cloneVids[i].pause(); }
+          if(cloneVids[i] && origVids[i]) { cloneVids[i].currentTime = origVids[i].currentTime > 0 ? origVids[i].currentTime : 0.001; if (scatterPosterDataUrl && currentTheme === 'default') cloneVids[i].poster = scatterPosterDataUrl; cloneVids[i].pause(); }
       }
 
       DOM.grid.innerHTML = '';

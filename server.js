@@ -319,11 +319,11 @@ app.post('/sync_balance', (req, res) => {
 app.post('/shop_buy', (req, res) => {
     const { username, password, item_id } = req.body;
     
-    // Cập nhật giá bán của Item mới (skin8: 1 tỷ)
+    // Khai báo giá bán cho Combo Kỳ Lân mới (skin10: 2.5 tỷ)
     const SHOP_PRICES = { 
         'skin1': 10000, 'skin2': 50000, 'skin3': 500000, 
         'skin4': 1000000, 'skin5': 10000000, 'skin6': 100000000, 
-        'skin7': 0, 'skin8': 1000000000 
+        'skin7': 0, 'skin8': 1000000000, 'skin9': 2500000000, 'skin10': 2500000000
     };
     const actualPrice = SHOP_PRICES[item_id];
     
