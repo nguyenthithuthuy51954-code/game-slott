@@ -9,7 +9,7 @@ app.use(express.static('jungle'));
 
 // 1. KẾT NỐI ĐẾN CLOUD DATABASE (MYSQL)
 const pool = mysql.createPool({
-    uri: process.env.DB_URI || 'mysql://2sH2hBKRZWCqXSP.root:pHbcjHbe91aD9EGf@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sys', // Dán chuỗi URI copy từ Aiven/TiDB vào đây
+    uri: process.env.DB_URI || 'mysql://2sH2hBKRZWCqXSP.root:pHbcjHbe91aD9EGf@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sys', // Dán chuỗi URI TiDB của bạn vào đây
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -31,8 +31,15 @@ pool.query(`CREATE TABLE IF NOT EXISTS players (
     else console.log("Đã kết nối Cloud MySQL Database thành công.");
 });
 
+// FIX LỖI 1: Tự động phát hiện và chuyển đổi nut6.jpg thành spin7.mp4 cho những acc cũ
 const parseShopData = (dataString) => {
-    try { return dataString ? JSON.parse(dataString) : { unlocked: [], equipped: 'nut-quay.png' }; } 
+    try { 
+        let data = dataString ? JSON.parse(dataString) : { unlocked: [], equipped: 'nut-quay.png' }; 
+        if (data.equipped === 'nut6.jpg' || data.equipped === 'nut6.png') {
+            data.equipped = 'spin7.mp4';
+        }
+        return data;
+    } 
     catch(e) { return { unlocked: [], equipped: 'nut-quay.png' }; }
 };
 
