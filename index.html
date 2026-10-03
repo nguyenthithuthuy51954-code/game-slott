@@ -40,12 +40,17 @@
 
     /* TOP HUD */
     .top-hud { position: absolute; top: 5px; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 15px; z-index: 20; pointer-events: none; gap: 8px; }
-    .top-box { background: linear-gradient(to bottom, #504638, #2a2218); border: 2px solid #5a753c; border-radius: 8px; padding: 6px 10px; text-align: center; min-width: 70px; box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.1); pointer-events: auto; }
+    .top-box { background: linear-gradient(to bottom, #504638, #2a2218); border: 2px solid #5a753c; border-radius: 8px; padding: 6px 8px; text-align: center; min-width: 70px; box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.1); pointer-events: auto; }
     #free-spin-box { visibility: hidden; position: relative; }
     #free-spin-box.active { visibility: visible; }
     .top-label { font-size: 0.55rem; color: #aaddaa; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
     .top-val { font-size: 1rem; font-weight: 900; color: #ffcc00; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
-    .player-name-val { font-size: 0.85rem; color: #00ffff; margin-top: 2px; text-transform: uppercase; white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis; font-weight: bold;}
+    
+    /* GIAO DIỆN NGƯỜI CHƠI (AVATAR HUD) */
+    .player-info-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .hud-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ccc; background: #fff; cursor: pointer; object-fit: cover; margin-bottom: 2px; pointer-events: auto; box-shadow: 0 0 5px rgba(0,0,0,0.8); }
+    .player-name-val { font-size: 0.7rem; color: #00ffff; margin-top: 1px; margin-bottom: 2px; text-transform: uppercase; white-space: nowrap; max-width: 75px; overflow: hidden; text-overflow: ellipsis; font-weight: bold;}
+    .btn-logout { background: #e74c3c; border: 1px solid #c0392b; color: white; border-radius: 4px; font-size: 0.55rem; padding: 2px 4px; cursor: pointer; width: 100%; font-weight: bold; }
 
     /* LỚP BÓNG TỐI LÓT LƯNG & VÙNG CHỨA SƯ TỬ NỀN */
     .lion-dark-backdrop { position: absolute; top: 5vh; left: 0; width: 100%; height: 25vh; background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0) 70%); z-index: 4; pointer-events: none; }
@@ -170,11 +175,12 @@
     .flying-plus-5.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     .flying-plus-5.fly { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; transition: transform 0.6s cubic-bezier(0.5, 0, 0.2, 1), opacity 0.6s ease; }
 
-    /* NÚT CHUNG */
-    .btn-shop, .btn-napthit { position: absolute; bottom: 26vh; width: 14vw; max-width: 65px; aspect-ratio: 1 / 1; border-radius: 50%; border: 3px solid #ffcc00; cursor: pointer; z-index: 99999; object-fit: cover; transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); -webkit-tap-highlight-color: transparent; }
+    /* NÚT CHUNG & BXH */
+    .btn-shop, .btn-napthit, .btn-bxh { position: absolute; bottom: 26vh; width: 14vw; max-width: 65px; aspect-ratio: 1 / 1; border-radius: 50%; border: 3px solid #ffcc00; cursor: pointer; z-index: 99999; object-fit: cover; transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); -webkit-tap-highlight-color: transparent; }
     .btn-shop { right: 4%; box-shadow: 0 0 15px #ff9800, inset 0 0 10px rgba(0,0,0,0.5); }
+    .btn-bxh { right: 20%; box-shadow: 0 0 15px #ffd700, inset 0 0 10px rgba(0,0,0,0.5); }
     .btn-napthit { left: 4%; box-shadow: 0 0 15px #ff5722, inset 0 0 10px rgba(0,0,0,0.5); }
-    .btn-shop:active, .btn-napthit:active { transform: scale(0.85); box-shadow: 0 0 5px #ff9800; }
+    .btn-shop:active, .btn-napthit:active, .btn-bxh:active { transform: scale(0.85); box-shadow: 0 0 5px #ff9800; }
 
     /* BOTTOM CONSOLE */
     .bottom-console { width: 100vw; max-width: 480px; aspect-ratio: 2.2 / 1; background: url('console-bg.png') no-repeat center center; background-size: 100% 100%; position: relative; margin-top: auto; margin-bottom: 2vh; z-index: 9999; filter: drop-shadow(0px -5px 10px rgba(0,0,0,0.5)); transition: background-image 0.5s ease;}
@@ -198,6 +204,40 @@
     .spin-hitbox { position: absolute; top: 25%; left: 34.5%; width: 31%; height: 68%; border-radius: 50%; z-index: auto; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
     .spin-btn-visual { width: 100%; height: 100%; background-image: url('nut-quay.png'); background-repeat: no-repeat; background-position: center center; background-size: cover; border-radius: 50%; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(0, 150, 255, 0.4); transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
+    /* ========================================================
+       ĐIỀU CHỈNH TỶ LỆ & VỊ TRÍ GIAO DIỆN COMBO ĐẾ PHẨM
+       ======================================================== */
+    .bottom-console.theme-ph, .bottom-console.theme-kylan, .bottom-console.theme-ai {
+      aspect-ratio: 16 / 9; /* Chỉnh tỷ lệ để ảnh không bị bóp méo */
+    }
+    .bottom-console.theme-ph .display-balance, .bottom-console.theme-kylan .display-balance, .bottom-console.theme-ai .display-balance {
+      top: 17%; left: 8%; width: 38%; justify-content: center; padding-left: 0;
+    }
+    .bottom-console.theme-ph .display-multiplier, .bottom-console.theme-kylan .display-multiplier, .bottom-console.theme-ai .display-multiplier {
+      top: 17%; left: 54%; width: 38%; justify-content: center; padding-left: 0;
+    }
+    .bottom-console.theme-ph .display-trade, .bottom-console.theme-kylan .display-trade, .bottom-console.theme-ai .display-trade {
+      top: 69%; left: 6%; width: 38%; justify-content: center; padding-left: 0;
+    }
+    .bottom-console.theme-ph .display-maxwin, .bottom-console.theme-kylan .display-maxwin, .bottom-console.theme-ai .display-maxwin {
+      top: 69%; left: 56%; width: 38%; justify-content: center; padding-left: 0;
+    }
+    .bottom-console.theme-ph .btn-minus, .bottom-console.theme-kylan .btn-minus, .bottom-console.theme-ai .btn-minus {
+      top: 42%; left: 9.5%; width: 9%; height: 18%;
+    }
+    .bottom-console.theme-ph .btn-plus, .bottom-console.theme-kylan .btn-plus, .bottom-console.theme-ai .btn-plus {
+      top: 42%; left: 22.5%; width: 9%; height: 18%;
+    }
+    .bottom-console.theme-ph .btn-info, .bottom-console.theme-kylan .btn-info, .bottom-console.theme-ai .btn-info {
+      top: 42%; left: 81.5%; width: 9%; height: 18%;
+    }
+    .bottom-console.theme-ph .btn-switch-game, .bottom-console.theme-kylan .btn-switch-game, .bottom-console.theme-ai .btn-switch-game {
+      top: 36%; left: 65%; width: 14%; height: 26%;
+    }
+    .bottom-console.theme-ph .spin-hitbox, .bottom-console.theme-kylan .spin-hitbox, .bottom-console.theme-ai .spin-hitbox {
+      top: 34%; left: 38%; width: 24%; height: 44%; /* Canh vừa khít vòng tròn trung tâm mới */
+    }
+
     /* CÁC HIỆU ỨNG GLOW CHO SKIN */
     .glow-hapham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px #4caf50, 0 0 25px #388e3c !important; }
     .glow-linhpham { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 20px #ffeb3b, 0 0 40px #ff9800 !important; filter: brightness(1.25); }
@@ -210,38 +250,32 @@
     .glow-depham-kylan { box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 30px #0044ff, 0 0 60px #00bfff !important; filter: brightness(1.5); }
     
     /* --- TỐI ƯU HÓA HOÀN TOÀN TÍNH NĂNG XÓA NỀN ĐEN VIDEO (MIX-BLEND-MODE) --- */
-    
     .spin-hitbox.video-skin-active {
         mix-blend-mode: screen !important; 
         -webkit-mix-blend-mode: screen !important;
         z-index: 15 !important;
     }
-    
     .spin-btn-screen-fix { 
-        filter: none !important; /* Xóa vách ngăn filter để blend mode hoạt động */
+        filter: none !important; 
         background: transparent !important;
         mix-blend-mode: screen !important; 
         -webkit-mix-blend-mode: screen !important;
     }
-    
     .spin-btn-video {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none;
         mix-blend-mode: screen !important;
         -webkit-mix-blend-mode: screen !important;
-        /* Ép độ tương phản cực đại để loại bỏ hoàn toàn các điểm xám mờ của MP4 thành màu đen tuyệt đối (#000) */
         filter: contrast(1.3) brightness(1.1) !important;
     }
-
     .spin-btn-screen-fix.clicking { 
         transform: scale(0.85) rotate(-10deg) !important; 
-        filter: none !important; /* Tuyệt đối không cho thêm filter lúc click chuột để tránh chớp nền đen */
+        filter: none !important; 
     }
-    
     .spin-btn-visual.clicking:not(.spin-btn-screen-fix) {
         transform: scale(0.85) rotate(-10deg) !important; filter: brightness(1.8) contrast(1.2) !important;
     }
 
-    /* HIỆU ỨNG KHÓI ĐỎ RỰC RỠ TỪ NÚT SPIN (Tạo bằng JS) */
+    /* HIỆU ỨNG KHÓI ĐỎ RỰC RỠ TỪ NÚT SPIN */
     .red-smoke-particle { position: fixed; width: 40px; height: 40px; background: radial-gradient(circle, rgba(255, 50, 0, 0.9) 0%, rgba(200, 0, 0, 0.6) 50%, transparent 100%); border-radius: 50%; pointer-events: none; z-index: 10000; opacity: 0; filter: blur(3px); animation: explodeSmoke 0.9s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; }
     @keyframes explodeSmoke { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; filter: blur(2px) brightness(2); } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(4); opacity: 0; filter: blur(8px) brightness(1); } }
 
@@ -250,12 +284,12 @@
     .modal-overlay.active { display: flex; }
     .info-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
     .info-wrapper img { max-width: 90vw; max-height: 90vh; width: auto; height: auto; display: block; }
-    #bonus-modal .info-wrapper img, #end-fs-modal .info-wrapper img, #switch-modal .info-wrapper img, #custom-shop-alert .info-wrapper img, #shop-confirm-modal .info-wrapper img, #napthit-confirm-modal .info-wrapper img, #password-unlock-modal .info-wrapper img { border: 4px solid #ffd700; border-radius: 12px; box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.5); }
+    #bonus-modal .info-wrapper img, #end-fs-modal .info-wrapper img, #switch-modal .info-wrapper img, #custom-shop-alert .info-wrapper img, #shop-confirm-modal .info-wrapper img, #napthit-confirm-modal .info-wrapper img, #password-unlock-modal .info-wrapper img, #bxh-confirm-modal .info-wrapper img { border: 4px solid #ffd700; border-radius: 12px; box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.5); }
     .close-info-hitbox { position: absolute; bottom: 2%; left: 20%; width: 60%; height: 12%; cursor: pointer; z-index: 10; background: transparent; }
     .start-fs-hitbox { position: absolute; bottom: 2%; left: 30%; width: 40%; height: 15%; cursor: pointer; z-index: 10; background: transparent; }
     #end-fs-amount { position: absolute; top: 70%; left: 50%; transform: translateX(-50%); font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 900; font-family: 'Arial Black', sans-serif; color: #fffbcc; text-shadow: 0 0 25px #ffea00, 0 0 50px #ff9800, 3px 3px 5px #000; -webkit-text-stroke: 1.5px #6d4c00; margin: 0; pointer-events: none; white-space: nowrap; }
 
-    /* SHOP CÓ TAB NAV */
+    /* CỬA HÀNG, TÀI KHOẢN, BẢNG XẾP HẠNG GIAO DIỆN CHUNG */
     .shop-bg-container, .nap-bg-container { position: relative; width: 95vw; max-width: 450px; display: flex; justify-content: center; align-items: center; }
     .shop-bg-img, .nap-bg-img { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 15px rgba(0,0,0,0.8)); }
     
@@ -289,54 +323,38 @@
 
     /* CSS ĐẶC BIỆT CHO KHUNG COMBO ĐẾ PHẨM */
     .shop-item.combo-item-style { 
-      background-size: 100% 100%; 
-      min-height: 130px; 
-      padding: 15px 15px 15px 38%; /* Đẩy nội dung sang phải để không đè lên hình ảnh bên trái khung */
-      display: flex; 
-      flex-direction: column; 
-      align-items: flex-start; 
-      justify-content: center; 
+      background-size: 100% 100%; min-height: 130px; padding: 15px 15px 15px 38%; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; 
     }
-    .combo-item-style .shop-item-info { 
-      text-align: left; 
-      padding: 0; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: flex-start; 
-      width: 100%; 
-    }
-    .combo-item-style .shop-item-name { 
-      font-size: 1.15rem; 
-      text-transform: uppercase; 
-      color: #ffffff; /* Màu chữ trắng */
-      -webkit-text-stroke: 1px #000000; /* Viền đen */
-      margin-bottom: 4px; 
-    }
-    .combo-item-style .shop-item-rarity { 
-      color: #ffffff; /* Đổi màu phân loại thành trắng cho nổi bật */
-      font-weight: bold; 
-      font-size: 0.9rem; 
-      margin-bottom: 6px; 
-      text-shadow: 1px 1px 3px #000; 
-    }
-    .combo-item-style .shop-item-action { 
-      position: relative; 
-      bottom: auto; 
-      right: auto; 
-      display: flex; 
-      justify-content: flex-start; 
-      margin-top: 5px; 
-      width: 100%; 
-    }
+    .combo-item-style .shop-item-info { text-align: left; padding: 0; display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
+    .combo-item-style .shop-item-name { font-size: 1.15rem; text-transform: uppercase; color: #ffffff; -webkit-text-stroke: 1px #000000; margin-bottom: 4px; }
+    .combo-item-style .shop-item-rarity { color: #ffffff; font-weight: bold; font-size: 0.9rem; margin-bottom: 6px; text-shadow: 1px 1px 3px #000; }
+    .combo-item-style .shop-item-action { position: relative; bottom: auto; right: auto; display: flex; justify-content: flex-start; margin-top: 5px; width: 100%; }
     
-    /* Giao diện riêng cho từng Combo */
     .combo-ai-bg { background: url('combo-ai/bg-item-ai.jpg') no-repeat center center; }
     .combo-ph-bg { background: url('combo-ph/bg-item-ph.jpg') no-repeat center center; padding-left: 40% !important; }
     .combo-kylan-bg { background: url('combo-kylan/bg-item-kylan.jpg') no-repeat center center; padding-left: 40% !important; }
     
-    .combo-name-ai { text-shadow: 0 0 8px #00bfff, 0 0 15px #00ffff; } /* Ánh xanh biển AI */
-    .combo-name-ph { text-shadow: 0 0 8px #ff9800, 0 0 15px #ff5722; } /* Ánh cam PH */
-    .combo-name-kylan { text-shadow: 0 0 8px #0088ff, 0 0 15px #00ffff; } /* Ánh xanh biển đậm Kỳ Lân */
+    .combo-name-ai { text-shadow: 0 0 8px #00bfff, 0 0 15px #00ffff; } 
+    .combo-name-ph { text-shadow: 0 0 8px #ff9800, 0 0 15px #ff5722; } 
+    .combo-name-kylan { text-shadow: 0 0 8px #0088ff, 0 0 15px #00ffff; } 
+
+    /* CSS GIAO DIỆN TÀI KHOẢN (PROFILE) */
+    .profile-av-item { display: flex; align-items: center; background: rgba(0,0,0,0.6); border: 2px solid #5a753c; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: inset 0 0 10px #000; }
+    .profile-av-img { width: 65px; height: 65px; border-radius: 8px; object-fit: cover; border: 2px solid #ffcc00; box-shadow: 0 0 5px #ff9800; flex-shrink: 0;}
+    .profile-av-info { flex: 1; padding-left: 15px; display: flex; flex-direction: column; align-items: flex-start;}
+    .profile-av-name { color: #fff; font-weight: bold; font-size: 1.05rem; margin-bottom: 8px; text-shadow: 1px 1px 2px #000; }
+    
+    .profile-fr-item { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.6); border: 2px solid #5a753c; border-radius: 8px; padding: 12px; margin-bottom: 15px; box-shadow: inset 0 0 10px #000; }
+    .profile-fr-name { color: #fff; font-weight: bold; font-size: 1.05rem; margin-bottom: 8px; text-shadow: 1px 1px 2px #000; width: 100%; text-align: left; }
+    .profile-fr-img { width: 100%; height: 95px; object-fit: fill; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ffcc00; }
+
+    /* CSS GIAO DIỆN BẢNG XẾP HẠNG (BXH) */
+    .bxh-item { display: flex; align-items: center; width: 100%; height: 80px; background-size: 100% 100%; background-repeat: no-repeat; margin-bottom: 10px; padding: 0 10px; position: relative; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
+    .bxh-rank { font-size: 1.6rem; font-weight: 900; color: #ffcc00; -webkit-text-stroke: 1px #5d3a00; width: 35px; text-align: center; text-shadow: 2px 2px 4px #000; }
+    .bxh-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #ffcc00; margin-left: 5px; object-fit: cover; box-shadow: 0 0 5px #000; flex-shrink: 0; }
+    .bxh-info { flex: 1; padding-left: 15px; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+    .bxh-name { font-weight: bold; font-size: 1.1rem; color: #ffffff; text-shadow: 1px 1px 3px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bxh-score { font-weight: 900; font-size: 1.15rem; color: #ffea00; text-shadow: 1px 1px 3px #000; margin-top: 3px; }
 
     #qr-modal .nap-bg-container { cursor: pointer; }
     .hitbox-nap { position: absolute; background: transparent; cursor: pointer; z-index: 20; -webkit-tap-highlight-color: transparent; }
@@ -380,9 +398,11 @@
 
   <div class="top-hud">
     <div class="top-box active">
-      <div class="top-label">NGƯỜI CHƠI</div>
-      <div class="player-name-val" id="player-name-display">---</div>
-      <button onclick="logout()" style="margin-top: 4px; background: #e74c3c; border: 1px solid #c0392b; color: white; border-radius: 4px; font-size: 0.6rem; padding: 2px 6px; cursor: pointer; width: 100%;">ĐỔI TÀI KHOẢN</button>
+      <div class="player-info-wrapper">
+        <img src="avatar4.png" id="hud-avatar" class="hud-avatar" onclick="requestOpenProfile()" alt="Avatar">
+        <div class="player-name-val" id="player-name-display">---</div>
+        <button class="btn-logout" onclick="logout()">ĐĂNG XUẤT</button>
+      </div>
     </div>
 
     <div class="top-box active">
@@ -408,6 +428,7 @@
     </div>
   </div>
 
+  <img src="bxh.png" class="btn-bxh" onclick="requestOpenBXH()" alt="Bảng Xếp Hạng">
   <img src="shop.jpg" class="btn-shop" onclick="requestOpenShop()" alt="Vào Cửa Hàng">
   <img src="bg-napthit.png" class="btn-napthit" onclick="requestOpenNapThit()" alt="Nạp Thịt">
 
@@ -444,7 +465,7 @@
     </div>
   </div>
 
-  <!-- MODALS -->
+  <!-- MODALS XÁC NHẬN -->
   <div class="modal-overlay" id="switch-modal">
     <div class="info-wrapper">
       <img src="xacnhan-nhiemvu.png" alt="Xác nhận chuyển game">
@@ -463,7 +484,6 @@
     </div>
   </div>
 
-  <!-- BẢNG NHẬP MẬT KHẨU MỞ KHÓA VẬT PHẨM ĐẶC BIỆT -->
   <div class="modal-overlay" id="password-unlock-modal" style="z-index: 9999999;">
     <div class="info-wrapper">
       <img src="xacnhan-nhiemvu.png" alt="Nhập mật khẩu">
@@ -485,6 +505,15 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="bxh-confirm-modal">
+    <div class="info-wrapper">
+      <img src="xacnhan-nhiemvu.png" alt="Xác nhận vào BXH">
+      <div style="position: absolute; top: 25%; left: 10%; width: 80%; text-align: center; color: #fffbcc; font-size: clamp(1.1rem, 4.5vw, 1.6rem); font-weight: 900; font-family: 'Arial Black', sans-serif; text-shadow: 2px 2px 5px #000; pointer-events: none; display: flex; align-items: center; justify-content: center; height: 50%;">Bạn có muốn xem Bảng Xếp Hạng không?</div>
+      <div onclick="confirmOpenBXH()" style="position: absolute; bottom: 12%; left: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+      <div onclick="cancelOpenBXH()" style="position: absolute; bottom: 12%; right: 12%; width: 35%; height: 25%; cursor: pointer; background: transparent; z-index: 10;"></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="napthit-confirm-modal">
     <div class="info-wrapper">
       <img src="xacnhan-nhiemvu.png" alt="Xác nhận nạp thịt">
@@ -494,11 +523,10 @@
     </div>
   </div>
 
+  <!-- MODALS CHÍNH -->
   <div class="modal-overlay" id="shop-modal">
     <div class="shop-bg-container">
       <img src="bg-shop.png" class="shop-bg-img" alt="Tiệm Thời Gian">
-      
-      <!-- NAV TABS SHOP -->
       <div class="shop-tabs" id="shop-tabs">
           <button class="shop-tab-btn active" onclick="changeShopCategory('Hạ phẩm', this)">Hạ Phẩm</button>
           <button class="shop-tab-btn" onclick="changeShopCategory('Linh phẩm', this)">Linh Phẩm</button>
@@ -507,10 +535,33 @@
           <button class="shop-tab-btn" onclick="changeShopCategory('Thượng phẩm', this)">Thượng Phẩm</button>
           <button class="shop-tab-btn" onclick="changeShopCategory('Đế phẩm', this)">Đế Phẩm</button>
       </div>
-
       <div class="shop-content-area"><div class="shop-items-grid" id="shop-items-container"></div></div>
       <div class="shop-close-hitbox" onclick="closeShop()"></div>
       <div class="shop-balance-display">Tài nguyên: <span id="shop-balance-val" style="margin-left: 5px; margin-right: 3px;">0</span> 🥩</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="profile-modal">
+    <div class="shop-bg-container">
+      <img src="bg-taikhoan.png" class="shop-bg-img" alt="Trang Tài Khoản">
+      <div class="shop-tabs">
+          <button class="shop-tab-btn active" onclick="changeProfileTab('avatar', this)">AVATAR</button>
+          <button class="shop-tab-btn" onclick="changeProfileTab('frame', this)">KHUNG HIỂN THỊ</button>
+      </div>
+      <div class="shop-content-area"><div class="shop-items-grid" id="profile-items-container"></div></div>
+      <div class="shop-close-hitbox" onclick="closeProfile()"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="bxh-modal">
+    <div class="shop-bg-container">
+      <img src="bg-bxh.png" class="shop-bg-img" alt="Bảng Xếp Hạng">
+      <div class="shop-tabs">
+          <button class="shop-tab-btn active" onclick="changeBXHTab('current', this)">BXH</button>
+          <button class="shop-tab-btn" onclick="changeBXHTab('vip', this)">BXH VIP</button>
+      </div>
+      <div class="shop-content-area"><div class="shop-items-grid" id="bxh-items-container"></div></div>
+      <div class="shop-close-hitbox" onclick="closeBXH()"></div>
     </div>
   </div>
 
@@ -572,6 +623,7 @@
         spinBtn: document.getElementById('spin-btn'),
         topPlayer: document.getElementById('top-player-display'),
         playerName: document.getElementById('player-name-display'),
+        hudAvatar: document.getElementById('hud-avatar'),
         loginOverlay: document.getElementById('login-overlay'),
         usernameInput: document.getElementById('username-input'),
         passwordInput: document.getElementById('password-input'),
@@ -584,6 +636,11 @@
         shopModal: document.getElementById('shop-modal'),
         shopItems: document.getElementById('shop-items-container'),
         shopBalance: document.getElementById('shop-balance-val'),
+        profileModal: document.getElementById('profile-modal'),
+        profileItems: document.getElementById('profile-items-container'),
+        bxhModal: document.getElementById('bxh-modal'),
+        bxhItems: document.getElementById('bxh-items-container'),
+        bxhConfirm: document.getElementById('bxh-confirm-modal'),
         customAlert: document.getElementById('custom-shop-alert'),
         alertMsg: document.getElementById('custom-alert-message'),
         switchModal: document.getElementById('switch-modal'),
@@ -635,9 +692,10 @@
     let targetServerBalance = 0, targetServerMaxWin = 0;
 
     let currentShopCategory = 'Hạ phẩm';
-    let currentTheme = 'default'; // Biến cờ theme: 'default', 'ai', 'ph', 'kylan'
+    let currentProfileTab = 'avatar';
+    let currentBXHTab = 'current';
+    let currentTheme = 'default'; 
 
-    // DANH SÁCH SKIN (Đã thêm combo Đế Phẩm Kỳ Lân)
     const SHOP_ITEMS = [
       { id: 'skin1', src: 'nut1.png', name: 'Kỳ Đại Ngàn', rarity: 'Hạ phẩm', price: 10000 },
       { id: 'skin2', src: 'nut2.png', name: 'Linh Đầm Cổ', rarity: 'Hạ phẩm', price: 50000 },
@@ -650,7 +708,23 @@
       { id: 'skin9', src: 'combo-ph/nut8.png', name: 'Thần Thú Phượng Hoàng', rarity: 'Đế phẩm', price: 2500000000, isCombo: true, comboType: 'ph' },
       { id: 'skin10', src: 'combo-kylan/nut9.png', name: 'Thần Thú Kỳ Lân', rarity: 'Đế phẩm', price: 2500000000, isCombo: true, comboType: 'kylan' }
     ];
-    let playerShopData = { unlocked: [], equipped: 'nut-quay.png' };
+
+    const AVATAR_ITEMS = [
+      { id: 'av4', src: 'avatar4.png', req: null, name: 'Avatar Nam' },
+      { id: 'av5', src: 'avatar5.png', req: null, name: 'Avatar Nữ' },
+      { id: 'av1', src: 'avatar1.png', req: 'skin8', name: 'Avatar Ảo Ảnh' },
+      { id: 'av2', src: 'avatar2.png', req: 'skin9', name: 'Avatar Phượng Hoàng' },
+      { id: 'av3', src: 'avatar3.png', req: 'skin10', name: 'Avatar Kỳ Lân' }
+    ];
+
+    const FRAME_ITEMS = [
+      { id: 'fr4', src: 'khunghienthi4.png', req: null, name: 'Khung Mặc Định' },
+      { id: 'fr1', src: 'khunghienthi1.png', req: 'skin8', name: 'Khung Ảo Ảnh' },
+      { id: 'fr2', src: 'khunghienthi2.png', req: 'skin9', name: 'Khung Phượng Hoàng' },
+      { id: 'fr3', src: 'khunghienthi3.png', req: 'skin10', name: 'Khung Kỳ Lân' }
+    ];
+
+    let playerShopData = { unlocked: [], equipped: 'nut-quay.png', equippedAvatar: 'avatar4.png', equippedFrame: 'khunghienthi4.png' };
 
     const SYM_CLASSES = {
         '🐸': 'frog-cell', '🐟': 'fish-cell', '🐗': 'boar-cell', '🐼': 'panda-cell',
@@ -680,41 +754,45 @@
       customAlertCallback = null;
     }
 
-    // HÀM CHUYỂN ĐỔI THEME KHI KÍCH HOẠT COMBO
     function applyTheme(themeName) {
         currentTheme = themeName;
         const charVideo = document.querySelector('.character-video');
+        const bottomConsole = document.querySelector('.bottom-console');
+        
+        bottomConsole.classList.remove('theme-ai', 'theme-ph', 'theme-kylan');
         
         if (themeName === 'ai') {
+            bottomConsole.classList.add('theme-ai'); 
             document.body.style.backgroundImage = "url('combo-ai/bg-game-ai.png')";
             DOM.frame.style.backgroundImage = "url('combo-ai/khung_2-ai.png')";
-            document.querySelector('.bottom-console').style.backgroundImage = "url('combo-ai/console-bg-ai.png')";
+            bottomConsole.style.backgroundImage = "url('combo-ai/console-bg-ai.png')";
             if (!charVideo.querySelector('source').src.includes('congnghe-ai.mp4')) {
                 changeVideoSource(charVideo, 'combo-ai/congnghe-ai.mp4');
             }
         } else if (themeName === 'ph') {
+            bottomConsole.classList.add('theme-ph'); 
             document.body.style.backgroundImage = "url('combo-ph/bg-game-ph.png')";
             DOM.frame.style.backgroundImage = "url('combo-ph/khung_2-ph.png')";
-            document.querySelector('.bottom-console').style.backgroundImage = "url('combo-ph/console-bg-ph.png')";
+            bottomConsole.style.backgroundImage = "url('combo-ph/console-bg-ph.png')";
             if (!charVideo.querySelector('source').src.includes('linhvat-ph.mp4')) {
                 changeVideoSource(charVideo, 'combo-ph/linhvat-ph.mp4');
             }
         } else if (themeName === 'kylan') {
+            bottomConsole.classList.add('theme-kylan'); 
             document.body.style.backgroundImage = "url('combo-kylan/bg-game-kylan.png')";
             DOM.frame.style.backgroundImage = "url('combo-kylan/khung_2-kylan.png')";
-            document.querySelector('.bottom-console').style.backgroundImage = "url('combo-kylan/console-bg-kylan.png')";
+            bottomConsole.style.backgroundImage = "url('combo-kylan/console-bg-kylan.png')";
             if (!charVideo.querySelector('source').src.includes('linhvat-kylan.mp4')) {
                 changeVideoSource(charVideo, 'combo-kylan/linhvat-kylan.mp4');
             }
         } else {
             document.body.style.backgroundImage = "url('bg-game.png'), url('hinhnen.jpg')";
             DOM.frame.style.backgroundImage = "url('khung_2.png')";
-            document.querySelector('.bottom-console').style.backgroundImage = "url('console-bg.png')";
+            bottomConsole.style.backgroundImage = "url('console-bg.png')";
             if (!charVideo.querySelector('source').src.includes('sutu-den.mp4')) {
                 changeVideoSource(charVideo, 'sutu-den.mp4');
             }
         }
-        // Gọi lại render để cập nhật ngay lập tức giao diện khóa nếu cần
         renderBoard('none');
     }
     
@@ -728,7 +806,6 @@
         }, 300);
     }
 
-    // ÁP DỤNG SKIN: THÍCH ỨNG CHUẨN MỌI MP4 & LẤY VIỀN SÁNG (GLOW) TỰ ĐỘNG
     function applySpinButtonSkin(src) {
         DOM.spinBtn.style.backgroundImage = 'none';
         DOM.spinBtn.innerHTML = ''; 
@@ -737,30 +814,17 @@
         const spinHitbox = DOM.spinBtn.parentElement;
         spinHitbox.classList.remove('video-skin-active');
 
-        // Kích hoạt theme Combo nếu đúng file nút spin combo
-        if (src === 'combo-ai/nut7.png' || src === 'nut7.png') {
-            applyTheme('ai');
-        } else if (src === 'combo-ph/nut8.png' || src === 'nut8.png') {
-            applyTheme('ph');
-        } else if (src === 'combo-kylan/nut9.png' || src === 'nut9.png') {
-            applyTheme('kylan');
-        } else {
-            applyTheme('default');
-        }
+        if (src === 'combo-ai/nut7.png' || src === 'nut7.png') applyTheme('ai');
+        else if (src === 'combo-ph/nut8.png' || src === 'nut8.png') applyTheme('ph');
+        else if (src === 'combo-kylan/nut9.png' || src === 'nut9.png') applyTheme('kylan');
+        else applyTheme('default');
 
         if (src && src.endsWith('.mp4')) {
-            // Khử nền đen chuẩn cho video thông qua mix-blend-mode 
             spinHitbox.classList.add('video-skin-active');
             DOM.spinBtn.classList.add('spin-btn-screen-fix'); 
-            
             const vid = document.createElement('video');
             vid.className = 'spin-btn-video';
-            vid.src = src;
-            vid.muted = true;
-            vid.playsInline = true;
-            vid.loop = false;
-            vid.id = 'spin-video-element';
-            
+            vid.src = src; vid.muted = true; vid.playsInline = true; vid.loop = false; vid.id = 'spin-video-element';
             vid.addEventListener('loadedmetadata', () => { vid.currentTime = 0.1; });
             vid.addEventListener('ended', () => { vid.currentTime = 0.1; vid.pause(); });
             DOM.spinBtn.appendChild(vid);
@@ -771,7 +835,6 @@
             DOM.spinBtn.style.borderRadius = '50%';
         }
 
-        // Tự động phân cấp viền sáng (glow effect)
         const item = SHOP_ITEMS.find(i => i.src === src);
         if (item) {
             if (item.rarity === 'Hạ phẩm') DOM.spinBtn.classList.add('glow-hapham');
@@ -804,12 +867,13 @@
         localStorage.setItem('Shared_Username', currentUser); localStorage.setItem('Shared_Password', currentPassword);
         
         balance = data.balance; maxWin = data.maxWin;   
-        playerShopData = data.shopData || { unlocked: [], equipped: 'nut-quay.png' };
+        playerShopData = data.shopData || { unlocked: [], equipped: 'nut-quay.png', equippedAvatar: 'avatar4.png', equippedFrame: 'khunghienthi4.png' };
 
-        // FIX CLIENT: Đồng bộ trực tiếp dưới máy khách nếu server chưa kịp đổi nut6.jpg thành spin7.mp4
         if (playerShopData.equipped === 'nut6.jpg' || playerShopData.equipped === 'nut6.png') {
             playerShopData.equipped = 'spin7.mp4';
         }
+        
+        if (DOM.hudAvatar) DOM.hudAvatar.src = playerShopData.equippedAvatar || 'avatar4.png';
 
         DOM.playerName.innerText = currentUser; DOM.maxWin.innerText = maxWin.toLocaleString();
         updateBalanceUI(); applySpinButtonSkin(playerShopData.equipped);
@@ -838,10 +902,116 @@
       if (DOM.shopBalance) DOM.shopBalance.innerText = balance.toLocaleString();
     }
 
+    // SHOP
     function requestOpenShop() { unlockAudio(); if (!isSpinning && !inFreeSpinsMode) DOM.shopConfirm.classList.add('active'); }
     function cancelOpenShop() { DOM.shopConfirm.classList.remove('active'); }
     function confirmOpenShop() { DOM.shopConfirm.classList.remove('active'); renderShopItems(); DOM.shopModal.classList.add('active'); }
     function closeShop() { DOM.shopModal.classList.remove('active'); }
+
+    // TÀI KHOẢN (PROFILE)
+    function requestOpenProfile() { unlockAudio(); if (!isSpinning && !inFreeSpinsMode) { renderProfileItems(); DOM.profileModal.classList.add('active'); } }
+    function closeProfile() { DOM.profileModal.classList.remove('active'); }
+    function changeProfileTab(tab, btnElement) {
+        unlockAudio();
+        currentProfileTab = tab;
+        const tabs = DOM.profileModal.querySelectorAll('.shop-tab-btn');
+        tabs.forEach(t => t.classList.remove('active'));
+        if (btnElement) btnElement.classList.add('active');
+        renderProfileItems();
+    }
+
+    function renderProfileItems() {
+        DOM.profileItems.innerHTML = '';
+        const isAvatar = currentProfileTab === 'avatar';
+        const itemsList = isAvatar ? AVATAR_ITEMS : FRAME_ITEMS;
+        
+        itemsList.forEach(item => {
+            let isUnlocked = item.req === null || playerShopData.unlocked.includes(item.req);
+            let isEquipped = (isAvatar ? playerShopData.equippedAvatar : playerShopData.equippedFrame) === item.src;
+            
+            let actionBtn;
+            if (!isUnlocked) actionBtn = `<button class="shop-btn-equipped" style="background:#555; color:#aaa; cursor:default;">KHÓA</button>`;
+            else if (isEquipped) actionBtn = `<button class="shop-btn-equipped">ĐANG DÙNG</button>`;
+            else actionBtn = `<button class="shop-btn-equip" onclick="equipProfileItem('${currentProfileTab}', '${item.src}')">KÍCH HOẠT</button>`;
+
+            if (isAvatar) {
+                DOM.profileItems.innerHTML += `
+                    <div class="profile-av-item">
+                        <img src="${item.src}" class="profile-av-img">
+                        <div class="profile-av-info">
+                            <div class="profile-av-name">${item.name}</div>
+                            ${actionBtn}
+                        </div>
+                    </div>`;
+            } else {
+                let fb = item.src === 'khunghienthi4.png' ? 'background: rgba(0,0,0,0.8); border: 1px solid #ccc;' : '';
+                DOM.profileItems.innerHTML += `
+                    <div class="profile-fr-item">
+                        <div class="profile-fr-name">${item.name}</div>
+                        <img src="${item.src}" class="profile-fr-img" style="${fb}">
+                        ${actionBtn}
+                    </div>`;
+            }
+        });
+    }
+
+    async function equipProfileItem(type, src) {
+      showCustomAlert("Trang bị mục này?", async () => {
+        try {
+            const response = await fetch(`${NGROK_URL}/profile_equip`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify({ username: currentUser, password: currentPassword, type: type, src: src }) });
+            const data = await response.json();
+            if (data.success) { 
+                playerShopData = data.shopData; 
+                if (type === 'avatar' && DOM.hudAvatar) DOM.hudAvatar.src = src;
+                renderProfileItems(); 
+            }
+        } catch (err) {}
+      });
+    }
+
+    // BẢNG XẾP HẠNG (BXH)
+    function requestOpenBXH() { unlockAudio(); if (!isSpinning && !inFreeSpinsMode) DOM.bxhConfirm.classList.add('active'); }
+    function cancelOpenBXH() { DOM.bxhConfirm.classList.remove('active'); }
+    function confirmOpenBXH() { DOM.bxhConfirm.classList.remove('active'); loadLeaderboardData(); DOM.bxhModal.classList.add('active'); }
+    function closeBXH() { DOM.bxhModal.classList.remove('active'); }
+    function changeBXHTab(tab, btnElement) {
+        unlockAudio();
+        currentBXHTab = tab;
+        const tabs = DOM.bxhModal.querySelectorAll('.shop-tab-btn');
+        tabs.forEach(t => t.classList.remove('active'));
+        if (btnElement) btnElement.classList.add('active');
+        loadLeaderboardData();
+    }
+
+    async function loadLeaderboardData() {
+        DOM.bxhItems.innerHTML = '<div style="text-align:center; color:#ccc; font-weight:bold; padding:20px;">Đang tải...</div>';
+        try {
+            const response = await fetch(`${NGROK_URL}/leaderboard?type=${currentBXHTab}`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+            const list = await response.json();
+            DOM.bxhItems.innerHTML = '';
+            if (!list || list.length === 0) {
+                DOM.bxhItems.innerHTML = '<div style="text-align:center; color:#ccc; font-weight:bold; padding:20px;">Chưa có dữ liệu.</div>';
+                return;
+            }
+            list.forEach((p, index) => {
+                let frameSrc = p.frame || 'khunghienthi4.png';
+                let avatarSrc = p.avatar || 'avatar4.png';
+                let bgStyle = frameSrc === 'khunghienthi4.png' ? 'background: rgba(0,0,0,0.6); border: 1px solid #ffcc00;' : `background-image: url('${frameSrc}');`;
+                
+                DOM.bxhItems.innerHTML += `
+                    <div class="bxh-item" style="${bgStyle}">
+                        <div class="bxh-rank">#${index + 1}</div>
+                        <img class="bxh-avatar" src="${avatarSrc}">
+                        <div class="bxh-info">
+                            <div class="bxh-name">${p.username}</div>
+                            <div class="bxh-score">${p.score.toLocaleString()} 🥩</div>
+                        </div>
+                    </div>`;
+            });
+        } catch(e) {
+            DOM.bxhItems.innerHTML = '<div style="text-align:center; color:#e74c3c; font-weight:bold; padding:20px;">Lỗi tải dữ liệu.</div>';
+        }
+    }
 
     function requestOpenNapThit() { unlockAudio(); if (!isSpinning && !inFreeSpinsMode) DOM.napConfirm.classList.add('active'); }
     function cancelOpenNapThit() { DOM.napConfirm.classList.remove('active'); }
@@ -886,7 +1056,7 @@
     function changeShopCategory(category, btnElement) {
         unlockAudio();
         currentShopCategory = category;
-        const tabs = document.querySelectorAll('.shop-tab-btn');
+        const tabs = document.querySelectorAll('#shop-modal .shop-tab-btn');
         tabs.forEach(tab => tab.classList.remove('active'));
         if (btnElement) btnElement.classList.add('active');
         renderShopItems();
@@ -894,7 +1064,6 @@
 
     function renderShopItems() {
       DOM.shopItems.innerHTML = ''; 
-      
       const filteredItems = SHOP_ITEMS.filter(item => item.rarity.toLowerCase() === currentShopCategory.toLowerCase());
 
       if (filteredItems.length === 0) {
@@ -921,7 +1090,6 @@
         
         let displayPrice = item.price === 'Vô giá' ? 'Vô giá' : item.price.toLocaleString() + ' 🥩';
 
-        // Xử lý hiển thị riêng cho các khung Combo Đế Phẩm
         if (item.isCombo) {
             const bgClass = item.comboType === 'ai' ? 'combo-ai-bg' : (item.comboType === 'ph' ? 'combo-ph-bg' : 'combo-kylan-bg');
             const nameClass = item.comboType === 'ai' ? 'combo-name-ai' : (item.comboType === 'ph' ? 'combo-name-ph' : 'combo-name-kylan');
@@ -1119,7 +1287,6 @@
 
           if (r === 0 && !unlockedCols[c]) {
             cell.classList.add('locked-cell');
-            // Cập nhật đường dẫn ảnh khóa theo Theme
             let lockImgUrl = `symbol-khoa${UNLOCK_THRESHOLDS[c]}.png`;
             if (currentTheme === 'ai') lockImgUrl = `combo-ai/symbol-khoa-ai-${UNLOCK_THRESHOLDS[c]}.png`;
             else if (currentTheme === 'ph') lockImgUrl = `combo-ph/symbol-khoa-ph-${UNLOCK_THRESHOLDS[c]}.png`;
@@ -1244,7 +1411,6 @@
               spinVid.play().catch(e => {});
           }
 
-          // Điều kiện chặn khói đỏ nếu người chơi đang sử dụng spin6.mp4 hoặc spin7.mp4
           if (!playerShopData.equipped.includes('spin6.mp4') && !playerShopData.equipped.includes('spin7.mp4')) {
               spawnRedSmokeEffect(DOM.spinBtn.parentElement);
           }
