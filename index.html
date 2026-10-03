@@ -284,11 +284,48 @@
     .shop-btn-equipped { background: #555; color: #aaa; border: 2px solid #888; padding: 0; border-radius: 6px; font-weight: 900; cursor: default; width: 85px; height: 35px; }
 
     /* CSS ĐẶC BIỆT CHO KHUNG COMBO ĐẾ PHẨM */
-    .shop-item.combo-ai-style { background: url('combo-ai/bg-item-ai.jpg') no-repeat center center; background-size: 100% 100%; min-height: 120px; padding: 15px 20px; flex-direction: column; align-items: center; justify-content: center; }
-    .shop-item.combo-ai-style .shop-item-info { text-align: center; padding: 0; display: flex; flex-direction: column; align-items: center; width: 100%; }
-    .shop-item.combo-ai-style .shop-item-name { font-size: 1.2rem; text-transform: uppercase; color: #fff; text-shadow: 0 0 10px #00ffff, 2px 2px 4px #000; margin-bottom: 5px; }
-    .shop-item.combo-ai-style .shop-item-rarity { color: #aa00ff; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; text-shadow: 1px 1px 2px #000; }
-    .shop-item.combo-ai-style .shop-item-action { position: relative; bottom: auto; right: auto; display: flex; justify-content: center; margin-top: 10px; width: 100%; }
+    .shop-item.combo-ai-style { 
+      background: url('combo-ai/bg-item-ai.jpg') no-repeat center center; 
+      background-size: 100% 100%; 
+      min-height: 130px; 
+      padding: 15px 15px 15px 36%; /* Đẩy nội dung sang phải để không đè lên Rồng[cite: 11] */
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-start; 
+      justify-content: center; 
+    }
+    .shop-item.combo-ai-style .shop-item-info { 
+      text-align: left; 
+      padding: 0; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-start; 
+      width: 100%; 
+    }
+    .shop-item.combo-ai-style .shop-item-name { 
+      font-size: 1.15rem; 
+      text-transform: uppercase; 
+      color: #ffffff; /* Màu chữ trắng */
+      -webkit-text-stroke: 1px #000000; /* Viền đen */
+      text-shadow: 0 0 8px #00bfff, 0 0 15px #00ffff; /* Ánh xanh biển */
+      margin-bottom: 4px; 
+    }
+    .shop-item.combo-ai-style .shop-item-rarity { 
+      color: #ffffff; /* Đổi màu phân loại thành trắng cho nổi bật */
+      font-weight: bold; 
+      font-size: 0.9rem; 
+      margin-bottom: 6px; 
+      text-shadow: 1px 1px 3px #000; 
+    }
+    .shop-item.combo-ai-style .shop-item-action { 
+      position: relative; 
+      bottom: auto; 
+      right: auto; 
+      display: flex; 
+      justify-content: flex-start; 
+      margin-top: 5px; 
+      width: 100%; 
+    }
 
     #qr-modal .nap-bg-container { cursor: pointer; }
     .hitbox-nap { position: absolute; background: transparent; cursor: pointer; z-index: 20; -webkit-tap-highlight-color: transparent; }
@@ -593,7 +630,7 @@
     const SHOP_ITEMS = [
       { id: 'skin1', src: 'nut1.png', name: 'Kỳ Đại Ngàn', rarity: 'Hạ phẩm', price: 10000 },
       { id: 'skin2', src: 'nut2.png', name: 'Linh Đầm Cổ', rarity: 'Hạ phẩm', price: 50000 },
-      { id: 'skin7', src: 'spin7.mp4', name: 'Nạp lần đầu', rarity: 'Linh phẩm', price: 'Vô giá', isPasswordLocked: true, isHiddenImg: true },
+      { id: 'skin7', src: 'spin7.mp4', name: 'Nạp lần đầu', rarity: 'Siêu phẩm', price: 'Vô giá', isPasswordLocked: true, isHiddenImg: true },
       { id: 'skin3', src: 'nut3.png', name: 'Hoàng Kim Sinh Mệnh', rarity: 'Linh phẩm', price: 500000 },
       { id: 'skin4', src: 'nut4.png', name: 'Băng Phong Ma Trận', rarity: 'Siêu phẩm', price: 1000000 },
       { id: 'skin5', src: 'nut5.png', name: 'Dạ Quang Huyền Ảo', rarity: 'Cực phẩm', price: 10000000 },
@@ -853,12 +890,13 @@
         
         let displayPrice = item.price === 'Vô giá' ? 'Vô giá' : item.price.toLocaleString() + ' 🥩';
 
+        // Tạo thẻ thông tin tùy biến cho phần "Bỏ chữ (Combo Toàn Diện)" 
         if (item.isCombo) {
             DOM.shopItems.innerHTML += `
               <div class="shop-item combo-ai-style">
                 <div class="shop-item-info">
                   <div class="shop-item-name">${item.name}</div>
-                  <div class="shop-item-rarity">Phân loại: ${item.rarity} (Combo Toàn Diện)</div>
+                  <div class="shop-item-rarity">Phân loại: ${item.rarity}</div>
                   <div class="shop-item-price">${isUnlocked ? 'Đã sở hữu' : displayPrice}</div>
                   <div class="shop-item-action">${actionBtn}</div>
                 </div>
@@ -1157,6 +1195,10 @@
           if (spinVid) {
               spinVid.currentTime = 0;
               spinVid.play().catch(e => {});
+          }
+
+          // Điều kiện mới: Bỏ khói đỏ nếu người chơi đang sử dụng spin6.mp4 hoặc spin7.mp4
+          if (playerShopData.equipped !== 'spin6.mp4' && playerShopData.equipped !== 'spin7.mp4') {
               spawnRedSmokeEffect(DOM.spinBtn.parentElement);
           }
       }
